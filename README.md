@@ -21,7 +21,7 @@ Um site estático único (`docs/index.html`) que serve como **painel de controle
 4. Injeta CSS, dashboard, video-cards, copy-buttons, checkbox manual e JS
 5. Grava em `docs/index.html` (servido pelo GitHub Pages)
 
-## Estrutura
+## Estrutura 
 
 ```
 .
