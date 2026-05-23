@@ -1,6 +1,6 @@
 # vfz-sispost
 
-Sistema de Postagens dos Reels do **Prof. Vinícius Ferraz** — Fluência Contábil.
+Sistema de Postagens 
 
 ## O que é
 
