@@ -1,0 +1,16 @@
+{
+  "name": "vfz-sispost",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Sistema de Postagens — Fluência Contábil. Dashboard de status dos Reels do Prof. Vinícius Ferraz com integração ao Google Drive.",
+  "main": "update.js",
+  "scripts": {
+    "update": "node update.js",
+    "update:cached": "node update.js --cached",
+    "diff": "node diff_check.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
