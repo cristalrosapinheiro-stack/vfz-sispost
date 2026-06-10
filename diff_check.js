@@ -1,18 +1,20 @@
-// diff_check.js — Compara textos das legendas entre FINAL_DOC1 e deploy/index.html
+// diff_check.js — Compara textos das legendas entre os sources e docs/index.html
 const fs = require('fs');
 
-const src    = fs.readFileSync('_MARKETING/HTML/22_legendas_FINAL_DOC1.html', 'utf8');
-const deploy = fs.readFileSync('deploy/index.html', 'utf8');
+const src = fs.readFileSync('source/headlines.html', 'utf8')
+          + '\n' + fs.readFileSync('source/dicionario.html', 'utf8');
+const deploy = fs.readFileSync('docs/index.html', 'utf8');
 
 // Extrai cada bloco .legenda (texto + estrutura, sem CSS/JS injetados)
 function extractBlocks(html) {
   const blocks = {};
   // Match each <div class="legenda..."> ... </div> (até o próximo <!-- ============ ou final)
   // Captura tudo dentro do bloco
-  const re = /<span class="num">(PR[ÁA]TICO|MOTIVACIONAL)\s+(\d+)<\/span>[\s\S]*?(?=<!-- =|<div class="section-title|<footer|$)/g;
+  const re = /<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>[\s\S]*?(?=<!-- =|<div class="section-title|<\/section|<footer|$)/g;
   let m;
   while ((m = re.exec(html)) !== null) {
-    const type = m[1].toUpperCase().startsWith('PR') ? 'P' : 'M';
+    const tu = m[1].toUpperCase();
+    const type = tu.startsWith('PR') ? 'P' : tu.startsWith('DICIO') ? 'D' : 'M';
     const key  = type + m[2];
     // Para comparar, pega apenas o texto dentro de .headline, .opening, .block-title, .block, .closing, .cta-final
     const chunk = m[0];

@@ -5,10 +5,18 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
+// ── Série 1: Práticos + Motivacionais ──
 const FOLDER_TODOS    = '1ZXq4tc08ezjnnC-t8gRbbYslWVIkDhh0';
 const FOLDER_POSTADOS = '1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl';
-const HTML_IN  = 'source/headlines.html';
-const HTML_OUT = 'docs/index.html';
+// ── Série 2: Práticos do Dicionário ──
+const FOLDER_DICIO          = '1aoKnGLdlQCAXN6TAhCUnASEtMtRC0IfQ';
+const FOLDER_DICIO_POSTADOS = null; // TODO: quando a subpasta "postados" do dicionário existir, colocar o ID aqui
+// ── Série 3: Cortes da Live (aguardando pasta + legendas) ──
+const FOLDER_LIVE = null;
+
+const HTML_IN   = 'source/headlines.html';
+const DICIO_IN  = 'source/dicionario.html';
+const HTML_OUT  = 'docs/index.html';
 
 function fetchFolder(id, outFile) {
   execSync(`curl -sL "https://drive.google.com/drive/folders/${id}" -A "Mozilla/5.0" -o "${outFile}"`, { stdio: 'inherit' });
@@ -36,62 +44,104 @@ function keyOf(name) {
   if (m) return 'P' + m[1];
   m = name.match(/^MOTIVACIONAL\s+M?(\d+)/i);
   if (m) return 'M' + m[1];
+  m = name.match(/^DICIO\s*(\d+)/i);   // aceita "DICIO 2- ..." (hífen colado)
+  if (m) return 'D' + m[1];
   return null;
 }
 
 const SKIP_FETCH = process.argv.includes('--cached');
-let allFiles, postFiles;
-if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json')) {
-  console.log('[1-2/3] Usando cache (drive_files.json / drive_postados.json)');
-  allFiles  = JSON.parse(fs.readFileSync('drive_files.json', 'utf8'));
-  postFiles = JSON.parse(fs.readFileSync('drive_postados.json', 'utf8'));
+let allFiles, postFiles, dicioFiles, dicioPostFiles;
+if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json') && fs.existsSync('drive_dicio.json')) {
+  console.log('[1-3/4] Usando cache (drive_files.json / drive_postados.json / drive_dicio.json)');
+  allFiles   = JSON.parse(fs.readFileSync('drive_files.json', 'utf8'));
+  postFiles  = JSON.parse(fs.readFileSync('drive_postados.json', 'utf8'));
+  dicioFiles = JSON.parse(fs.readFileSync('drive_dicio.json', 'utf8'));
+  dicioPostFiles = fs.existsSync('drive_dicio_postados.json')
+    ? JSON.parse(fs.readFileSync('drive_dicio_postados.json', 'utf8')) : [];
 } else {
-  console.log('[1/3] Baixando pasta principal...');
+  console.log('[1/4] Baixando pasta principal...');
   const htmlAll  = fetchFolder(FOLDER_TODOS,    'drive_folder.html');
-  console.log('[2/3] Baixando subpasta postados...');
+  console.log('[2/4] Baixando subpasta postados...');
   const htmlPost = fetchFolder(FOLDER_POSTADOS, 'drive_postados.html');
-  allFiles  = parseFiles(htmlAll);
-  postFiles = parseFiles(htmlPost);
+  console.log('[3/4] Baixando pasta do dicionário...');
+  const htmlDicio = fetchFolder(FOLDER_DICIO,   'drive_dicio.html');
+  allFiles   = parseFiles(htmlAll);
+  postFiles  = parseFiles(htmlPost);
+  dicioFiles = parseFiles(htmlDicio);
+  dicioPostFiles = [];
+  if (FOLDER_DICIO_POSTADOS) {
+    console.log('[3b/4] Baixando subpasta postados do dicionário...');
+    const htmlDicioPost = fetchFolder(FOLDER_DICIO_POSTADOS, 'drive_dicio_postados.html');
+    dicioPostFiles = parseFiles(htmlDicioPost);
+  }
   fs.writeFileSync('drive_files.json',    JSON.stringify(allFiles,  null, 2));
   fs.writeFileSync('drive_postados.json', JSON.stringify(postFiles, null, 2));
+  fs.writeFileSync('drive_dicio.json',    JSON.stringify(dicioFiles, null, 2));
+  fs.writeFileSync('drive_dicio_postados.json', JSON.stringify(dicioPostFiles, null, 2));
 }
 
+// ── Série 1 (P/M) ──
 const gravado = {}, postado = {};
-for (const f of allFiles)  { const k = keyOf(f.name); if (k) gravado[k]  = f; }
-for (const f of postFiles) { const k = keyOf(f.name); if (k) postado[k] = f; }
+for (const f of allFiles)  { const k = keyOf(f.name); if (k && k[0] !== 'D') gravado[k]  = f; }
+for (const f of postFiles) { const k = keyOf(f.name); if (k && k[0] !== 'D') postado[k] = f; }
+
+// ── Série 2 (DICIO) ──
+const gravadoD = {}, postadoD = {};
+for (const f of dicioFiles)     { const k = keyOf(f.name); if (k && k[0] === 'D') gravadoD[k]  = f; }
+for (const f of dicioPostFiles) { const k = keyOf(f.name); if (k && k[0] === 'D') postadoD[k] = f; }
+
+const TOTAL_MAIN  = 30;
+const TOTAL_DICIO = 8;
 
 const allRecorded = new Set([...Object.keys(gravado), ...Object.keys(postado)]);
 const aguardando  = [...Object.keys(gravado)].filter(k => !postado[k]).length;
-const naoGravados = 30 - allRecorded.size;
+const naoGravados = TOTAL_MAIN - allRecorded.size;
 
-console.log('[3/3] Gerando HTML...');
-console.log(`  POSTADOS: ${Object.keys(postado).length} → ${Object.keys(postado).sort().join(', ')}`);
-console.log(`  AGUARDANDO POSTAGEM: ${aguardando}`);
-console.log(`  NÃO GRAVADOS: ${naoGravados}`);
+const allRecordedD = new Set([...Object.keys(gravadoD), ...Object.keys(postadoD)]);
+const aguardandoD  = [...Object.keys(gravadoD)].filter(k => !postadoD[k]).length;
+const naoGravadosD = TOTAL_DICIO - allRecordedD.size;
+
+console.log('[4/4] Gerando HTML...');
+console.log(`  [P+M]   POSTADOS: ${Object.keys(postado).length} → ${Object.keys(postado).sort().join(', ')}`);
+console.log(`  [P+M]   AGUARDANDO: ${aguardando} | NÃO GRAVADOS: ${naoGravados}`);
+console.log(`  [DICIO] POSTADOS: ${Object.keys(postadoD).length} → ${Object.keys(postadoD).sort().join(', ')}`);
+console.log(`  [DICIO] AGUARDANDO: ${aguardandoD} | NÃO GRAVADOS: ${naoGravadosD}`);
 
 let html = fs.readFileSync(HTML_IN, 'utf8');
+let dicioHtml = fs.readFileSync(DICIO_IN, 'utf8');
 
 // Inject viewport meta if missing (essential for mobile rendering)
 if (!/<meta\s+name=["']viewport["']/i.test(html)) {
   html = html.replace('<meta charset="UTF-8">', '<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">');
 }
 
-// === EXTRAIR HEADLINES OFICIAIS DO FINAL_DOC1 ===
-// O nome do arquivo no Drive ficou defasado em alguns vídeos (contém "apostila").
-// O FINAL_DOC1 é a fonte da verdade — vamos exibir a headline dele no card, não o nome do arquivo.
-const headlines = {};
-const headlineRe = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
-let _hm;
-while ((_hm = headlineRe.exec(html)) !== null) {
-  const _type = _hm[1].toUpperCase().startsWith('PR') ? 'P' : 'M';
-  const _key  = _type + _hm[2];
-  headlines[_key] = _hm[3]
-    .replace(/<br\s*\/?>/gi, ' ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
+// === EXTRAIR HEADLINES OFICIAIS DOS SOURCES ===
+// O nome do arquivo no Drive pode ficar defasado — o source é a fonte da verdade
+// dos textos; o card exibe a headline do source, não o nome do arquivo.
+function typeToKeyPrefix(type) {
+  const tu = type.toUpperCase();
+  if (tu.startsWith('PR')) return 'P';
+  if (tu.startsWith('DICIO')) return 'D';
+  return 'M';
 }
-console.log(`  Headlines extraídas: ${Object.keys(headlines).length}`);
+
+function extractHeadlines(htmlStr) {
+  const out = {};
+  const re = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
+  let m;
+  while ((m = re.exec(htmlStr)) !== null) {
+    out[typeToKeyPrefix(m[1]) + m[2]] = m[3]
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  return out;
+}
+
+const headlines  = extractHeadlines(html);
+const headlinesD = extractHeadlines(dicioHtml);
+console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO)`);
 
 const cssInject = `
   /* === SISTEMA DE POSTAGENS === */
@@ -462,23 +512,138 @@ const cssInject = `
     .legenda .tag { display: block; margin: 6px 0 0; }
     .preview-iframe { height: 220px; }
   }
+
+  /* === ABAS (séries) === */
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: #FBF6E9;
+    padding: 10px 0;
+    margin: 0 0 22px;
+    border-bottom: 2px solid #C8A84B;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 13px 8px;
+    background: #fff;
+    border: 1px solid #C8A84B;
+    border-radius: 4px;
+    color: #1B2A4A;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tab-btn:hover { background: #f4ecd7; }
+  .tab-btn.active {
+    background: #1B2A4A;
+    color: #C8A84B;
+    border-color: #1B2A4A;
+  }
+  .tab-btn .tab-count {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    margin-top: 3px;
+    opacity: 0.75;
+    text-transform: none;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .coming-soon {
+    background: #fff;
+    border: 2px dashed #C8A84B;
+    border-radius: 6px;
+    padding: 48px 24px;
+    text-align: center;
+    color: #1B2A4A;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 10px 0 30px;
+  }
+  .coming-soon small {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+    letter-spacing: 0.3px;
+    line-height: 1.6;
+  }
+
+  /* Breakdown por série no dashboard */
+  .dash-series {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed #e3d9c2;
+  }
+  .dash-series-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    color: #555;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .dash-series-row b {
+    color: #1B2A4A;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 720px) {
+    .tab-bar { gap: 5px; padding: 8px 0; }
+    .tab-btn { padding: 11px 4px; font-size: 10px; letter-spacing: 0.5px; }
+    .tab-btn .tab-count { font-size: 9px; }
+    .coming-soon { padding: 36px 16px; font-size: 14px; }
+    .dash-series-row { font-size: 10px; }
+    .dash-series-row b { font-size: 12px; }
+  }
 `;
 html = html.replace('</style>', cssInject + '\n</style>');
 
 const now = new Date();
 const ts = now.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-// === DASHBOARD ===
-const totalPostados   = Object.keys(postado).length;
-const totalGravados   = Object.keys(gravado).length + totalPostados;
-const totalPecas      = 30;
-const pctPostados     = Math.round((totalPostados / totalPecas) * 100);
-const postadosSorted  = Object.keys(postado).sort((a, b) => {
-  const na = parseInt(a.slice(1), 10), nb = parseInt(b.slice(1), 10);
-  if (a[0] === b[0]) return na - nb;
-  return a[0] === 'P' ? -1 : 1;
-});
-const postadosBadges = postadosSorted.map(k => `<span class="dash-pill">${k.replace('P','PRÁTICO ').replace('M','MOTIVACIONAL ')}</span>`).join(' ');
+// === DASHBOARD (agregado das séries + breakdown) ===
+function keyLabel(k) {
+  if (k[0] === 'P') return 'PRÁTICO ' + k.slice(1);
+  if (k[0] === 'M') return 'MOTIVACIONAL ' + k.slice(1);
+  return 'DICIO ' + k.slice(1);
+}
+const seriesOrder = { P: 0, M: 1, D: 2 };
+function sortKeys(keys) {
+  return keys.sort((a, b) => {
+    if (a[0] !== b[0]) return seriesOrder[a[0]] - seriesOrder[b[0]];
+    return parseInt(a.slice(1), 10) - parseInt(b.slice(1), 10);
+  });
+}
+
+const postMain  = Object.keys(postado).length;
+const postDicio = Object.keys(postadoD).length;
+const totalPostados = postMain + postDicio;
+const totalPecas    = TOTAL_MAIN + TOTAL_DICIO;
+const aguardandoAgg  = aguardando + aguardandoD;
+const naoGravadosAgg = naoGravados + naoGravadosD;
+const pctPostados    = Math.round((totalPostados / totalPecas) * 100);
+
+const postadosBadges = sortKeys([...Object.keys(postado), ...Object.keys(postadoD)])
+  .map(k => `<span class="dash-pill">${keyLabel(k)}</span>`).join(' ');
 
 const dashboard = `
 <div class="dashboard">
@@ -492,11 +657,11 @@ const dashboard = `
       <div class="dash-label">POSTADOS</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">${aguardando}</div>
+      <div class="dash-num">${aguardandoAgg}</div>
       <div class="dash-label">GRAVADOS<br>aguardando</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">${naoGravados}</div>
+      <div class="dash-num">${naoGravadosAgg}</div>
       <div class="dash-label">NÃO GRAVADOS</div>
     </div>
     <div class="dash-cell">
@@ -506,24 +671,37 @@ const dashboard = `
   </div>
   <div class="dash-bar"><div class="dash-bar-fill" style="width:${pctPostados}%"></div></div>
   ${totalPostados > 0 ? `<div class="dash-list"><strong>Já postados (Drive):</strong> ${postadosBadges}</div>` : ''}
+  <div class="dash-series">
+    <div class="dash-series-row"><span>Práticos + Motivacionais</span><b data-series-val="main">${postMain}/${TOTAL_MAIN}</b></div>
+    <div class="dash-series-row"><span>Dicionário Contábil</span><b data-series-val="dicio">${postDicio}/${TOTAL_DICIO}</b></div>
+    <div class="dash-series-row"><span>Cortes da Live</span><b data-series-val="live">em preparação</b></div>
+  </div>
   <div class="dash-manual">
     <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count" id="manual-count">0</span><span style="opacity:.6;font-weight:600;"> / ${totalPecas}</span></span>
     <button class="dash-manual-reset" onclick="resetManualStatus()" type="button">LIMPAR MARCAÇÕES</button>
   </div>
 </div>
 `;
-html = html.replace(/(<\/header>)/, '$1\n' + dashboard);
 
-html = html.replace(
-  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL)\s+(\d+)<\/span>/g,
+const tabBar = `
+<div class="tab-bar" role="tablist">
+  <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">${postMain}/${TOTAL_MAIN} postados</span></button>
+  <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">${postDicio}/${TOTAL_DICIO} postados</span></button>
+  <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">em breve</span></button>
+</div>
+`;
+
+function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
+  return srcHtml.replace(
+  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>/g,
   (full, prefix, type, num) => {
-    const key = (type.toUpperCase().startsWith('PR') ? 'P' : 'M') + num;
-    const post = postado[key];
-    const grav = gravado[key];
+    const key = typeToKeyPrefix(type) + num;
+    const post = postadoMap[key];
+    const grav = gravadoMap[key];
     const cardId = 'iframe_' + key;
     let card;
-    // Texto exibido no link do card = headline oficial do FINAL_DOC1 (não o nome do arquivo do Drive)
-    const officialHeadline = headlines[key] || `${type} ${num}`;
+    // Texto exibido no link do card = headline oficial do source (não o nome do arquivo do Drive)
+    const officialHeadline = headlinesMap[key] || `${type} ${num}`;
     const displayText = officialHeadline.length > 110 ? officialHeadline.slice(0, 107) + '...' : officialHeadline;
     const labelPrefix = `${type} ${num} — `;
 
@@ -559,7 +737,33 @@ html = html.replace(
       </button>`;
     return `${prefix}<button class="copy-btn" data-key="${key}" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">${type} ${num}</span>\n      ${card}\n      ${manualBtn}\n      `;
   }
-);
+  );
+}
+
+// Injeta os cards em cada série (cada uma com seus mapas do Drive)
+html      = injectCards(html,      postado,  gravado,  headlines);
+dicioHtml = injectCards(dicioHtml, postadoD, gravadoD, headlinesD);
+
+// === MONTAGEM DAS ABAS ===
+// Painel 1 (main): envolve o conteúdo existente entre o header e o footer.
+// Painéis 2 e 3: inseridos antes do footer.
+const painelDicio = `
+<section class="tab-panel" id="tab-dicio" data-series="dicio" data-total="${TOTAL_DICIO}" role="tabpanel">
+${dicioHtml}
+</section>`;
+
+const painelLive = `
+<section class="tab-panel" id="tab-live" data-series="live" data-total="0" role="tabpanel">
+  <div class="coming-soon">
+    🎬 CORTES DA LIVE
+    <small>Em preparação — os vídeos e legendas desta série serão adicionados em breve.<br>
+    Assim que a pasta do Drive e as legendas estiverem prontas, esta aba será preenchida automaticamente.</small>
+  </div>
+</section>`;
+
+html = html.replace(/(<\/header>)/, '$1\n' + dashboard + tabBar +
+  `<section class="tab-panel active" id="tab-main" data-series="main" data-total="${TOTAL_MAIN}" role="tabpanel">`);
+html = html.replace('<footer', '</section>\n' + painelDicio + '\n' + painelLive + '\n<footer');
 
 const jsInject = `
 <script>
@@ -567,6 +771,18 @@ function togglePreview(id) {
   const f = document.getElementById(id);
   if (!f.src) f.src = f.dataset.src;
   f.classList.toggle('open');
+}
+
+// === ABAS (séries) ===
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(function(p) {
+    p.classList.toggle('active', p.id === 'tab-' + id);
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-tab') === id);
+  });
+  try { localStorage.setItem('vfz_active_tab', id); } catch (e) {}
+  window.scrollTo(0, 0);
 }
 
 // === MARCAÇÃO MANUAL (persistência local no celular do Vinícius) ===
@@ -702,6 +918,25 @@ function updateDashboardFromManual() {
   // Contador inline da linha de marcações
   var el = document.getElementById('manual-count');
   if (el) el.innerText = manualKeys.length;
+
+  // Breakdown por série (uma linha por aba no dashboard + contagem no botão da aba)
+  document.querySelectorAll('.tab-panel[data-series]').forEach(function(panel) {
+    var sTotal = parseInt(panel.getAttribute('data-total'), 10) || 0;
+    if (!sTotal) return; // série ainda sem conteúdo (ex.: live)
+    var sPosted = 0;
+    panel.querySelectorAll('.legenda').forEach(function(leg) {
+      var mBtn  = leg.querySelector('.manual-status');
+      var mCard = leg.querySelector('.video-card');
+      if (!mBtn || !mCard) return;
+      var ds = mCard.getAttribute('data-drive-status') || 'pendente';
+      if (ds === 'postado' || manualState[mBtn.dataset.key]) sPosted++;
+    });
+    var sName = panel.getAttribute('data-series');
+    var valEl = document.querySelector('[data-series-val="' + sName + '"]');
+    if (valEl) valEl.textContent = sPosted + '/' + sTotal;
+    var tabCount = document.querySelector('.tab-btn[data-tab="' + sName + '"] .tab-count');
+    if (tabCount) tabCount.textContent = sPosted + '/' + sTotal + ' postados';
+  });
 }
 
 function toggleManualStatus(btn) {
@@ -729,6 +964,10 @@ document.addEventListener('DOMContentLoaded', function() {
     applyManualState(btn, state);
   });
   updateDashboardFromManual();
+  // Restaura a última aba ativa (salva no celular)
+  var savedTab = null;
+  try { savedTab = localStorage.getItem('vfz_active_tab'); } catch (e) {}
+  if (savedTab && document.getElementById('tab-' + savedTab)) switchTab(savedTab);
 });
 
 function buildLegendaText(block) {
