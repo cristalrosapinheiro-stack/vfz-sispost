@@ -581,38 +581,11 @@ const cssInject = `
     line-height: 1.6;
   }
 
-  /* Breakdown por série no dashboard */
-  .dash-series {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed #e3d9c2;
-  }
-  .dash-series-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    letter-spacing: 0.8px;
-    color: #555;
-    text-transform: uppercase;
-    font-weight: 600;
-  }
-  .dash-series-row b {
-    color: #1B2A4A;
-    font-size: 13px;
-    letter-spacing: 0.5px;
-  }
-
   @media (max-width: 720px) {
     .tab-bar { gap: 5px; padding: 8px 0; }
     .tab-btn { padding: 11px 4px; font-size: 10px; letter-spacing: 0.5px; }
     .tab-btn .tab-count { font-size: 9px; }
     .coming-soon { padding: 36px 16px; font-size: 14px; }
-    .dash-series-row { font-size: 10px; }
-    .dash-series-row b { font-size: 12px; }
   }
 `;
 html = html.replace('</style>', cssInject + '\n</style>');
@@ -636,52 +609,54 @@ function sortKeys(keys) {
 
 const postMain  = Object.keys(postado).length;
 const postDicio = Object.keys(postadoD).length;
-const totalPostados = postMain + postDicio;
-const totalPecas    = TOTAL_MAIN + TOTAL_DICIO;
-const aguardandoAgg  = aguardando + aguardandoD;
-const naoGravadosAgg = naoGravados + naoGravadosD;
-const pctPostados    = Math.round((totalPostados / totalPecas) * 100);
 
-const postadosBadges = sortKeys([...Object.keys(postado), ...Object.keys(postadoD)])
-  .map(k => `<span class="dash-pill">${keyLabel(k)}</span>`).join(' ');
-
-const dashboard = `
-<div class="dashboard">
+// Gera um dashboard individual por série — fica no topo da aba correspondente.
+function buildSeriesDashboard(seriesId, titulo, stats) {
+  const pct = Math.round((stats.postados / stats.total) * 100);
+  const pills = sortKeys([...stats.postadosKeys])
+    .map(k => `<span class="dash-pill">${keyLabel(k)}</span>`).join(' ');
+  return `
+<div class="dashboard" data-dash="${seriesId}">
   <div class="dash-head">
-    <span class="dash-title">PROGRESSO DA POSTAGEM</span>
+    <span class="dash-title">${titulo}</span>
     <span class="dash-ts">Atualizado em ${ts}</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
-      <div class="dash-num">${totalPostados}<span class="dash-of">/${totalPecas}</span></div>
+      <div class="dash-num">${stats.postados}<span class="dash-of">/${stats.total}</span></div>
       <div class="dash-label">POSTADOS</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">${aguardandoAgg}</div>
+      <div class="dash-num">${stats.aguardando}</div>
       <div class="dash-label">GRAVADOS<br>aguardando</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">${naoGravadosAgg}</div>
+      <div class="dash-num">${stats.naoGravados}</div>
       <div class="dash-label">NÃO GRAVADOS</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">${pctPostados}<span class="dash-of">%</span></div>
+      <div class="dash-num">${pct}<span class="dash-of">%</span></div>
       <div class="dash-label">CONCLUÍDO</div>
     </div>
   </div>
-  <div class="dash-bar"><div class="dash-bar-fill" style="width:${pctPostados}%"></div></div>
-  ${totalPostados > 0 ? `<div class="dash-list"><strong>Já postados (Drive):</strong> ${postadosBadges}</div>` : ''}
-  <div class="dash-series">
-    <div class="dash-series-row"><span>Práticos + Motivacionais</span><b data-series-val="main">${postMain}/${TOTAL_MAIN}</b></div>
-    <div class="dash-series-row"><span>Dicionário Contábil</span><b data-series-val="dicio">${postDicio}/${TOTAL_DICIO}</b></div>
-    <div class="dash-series-row"><span>Cortes da Live</span><b data-series-val="live">em preparação</b></div>
-  </div>
+  <div class="dash-bar"><div class="dash-bar-fill" style="width:${pct}%"></div></div>
+  ${stats.postados > 0 ? `<div class="dash-list"><strong>Já postados (Drive):</strong> ${pills}</div>` : ''}
   <div class="dash-manual">
-    <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count" id="manual-count">0</span><span style="opacity:.6;font-weight:600;"> / ${totalPecas}</span></span>
-    <button class="dash-manual-reset" onclick="resetManualStatus()" type="button">LIMPAR MARCAÇÕES</button>
+    <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count">0</span><span style="opacity:.6;font-weight:600;"> / ${stats.total}</span></span>
+    <button class="dash-manual-reset" onclick="resetManualStatus('${seriesId}')" type="button">LIMPAR MARCAÇÕES</button>
   </div>
 </div>
 `;
+}
+
+const dashboardMain = buildSeriesDashboard('main', 'PROGRESSO — PRÁTICOS + MOTIVACIONAIS', {
+  postados: postMain, total: TOTAL_MAIN, aguardando, naoGravados,
+  postadosKeys: Object.keys(postado)
+});
+const dashboardDicio = buildSeriesDashboard('dicio', 'PROGRESSO — DICIONÁRIO CONTÁBIL', {
+  postados: postDicio, total: TOTAL_DICIO, aguardando: aguardandoD, naoGravados: naoGravadosD,
+  postadosKeys: Object.keys(postadoD)
+});
 
 const tabBar = `
 <div class="tab-bar" role="tablist">
@@ -749,6 +724,7 @@ dicioHtml = injectCards(dicioHtml, postadoD, gravadoD, headlinesD);
 // Painéis 2 e 3: inseridos antes do footer.
 const painelDicio = `
 <section class="tab-panel" id="tab-dicio" data-series="dicio" data-total="${TOTAL_DICIO}" role="tabpanel">
+${dashboardDicio}
 ${dicioHtml}
 </section>`;
 
@@ -761,8 +737,9 @@ const painelLive = `
   </div>
 </section>`;
 
-html = html.replace(/(<\/header>)/, '$1\n' + dashboard + tabBar +
-  `<section class="tab-panel active" id="tab-main" data-series="main" data-total="${TOTAL_MAIN}" role="tabpanel">`);
+html = html.replace(/(<\/header>)/, '$1\n' + tabBar +
+  `<section class="tab-panel active" id="tab-main" data-series="main" data-total="${TOTAL_MAIN}" role="tabpanel">` +
+  dashboardMain);
 html = html.replace('<footer', '</section>\n' + painelDicio + '\n' + painelLive + '\n<footer');
 
 const jsInject = `
@@ -850,92 +827,52 @@ function applyManualState(btn, state) {
   }
 }
 
-// Recalcula TODOS os números do dashboard considerando Drive + marcações manuais.
-// Regras:
+// Recalcula os números do dashboard DE CADA ABA considerando Drive + marcações manuais.
+// Regras (por série):
 //   POSTADOS    = (postados via Drive) ∪ (marcados manualmente)   — sem duplicar
 //   AGUARDANDO  = gravados no Drive que ainda NÃO foram marcados como postados (Drive nem manual)
-//   NÃO GRAVADO = lê direto do DOM (não muda em tempo real — só muda quando o Drive é re-sincronizado)
-//   % CONCLUÍDO = postados / total
+//   NÃO GRAVADO = ausentes do Drive (e não marcados manualmente)
+//   % CONCLUÍDO = postados / total da série
 function updateDashboardFromManual() {
   var manualState = loadManualState();
-  var manualKeys  = Object.keys(manualState);
 
-  // Lê status do Drive a partir do data-drive-status (imutável — ≠ da classe, que muda visualmente)
-  var drivePosted   = new Set();
-  var driveGravado  = new Set();
-  var driveNaoGrav  = new Set();
-  document.querySelectorAll('.legenda').forEach(function(leg) {
-    var btn  = leg.querySelector('.manual-status');
-    var card = leg.querySelector('.video-card');
-    if (!btn || !card) return;
-    var key = btn.dataset.key;
-    var ds  = card.getAttribute('data-drive-status') || 'pendente';
-    if (ds === 'postado')      drivePosted.add(key);
-    else if (ds === 'gravado') driveGravado.add(key);
-    else                       driveNaoGrav.add(key);
-  });
-
-  var total = drivePosted.size + driveGravado.size + driveNaoGrav.size; // 30
-  if (!total) total = 30;
-
-  // União: postado-no-Drive OU marcado-manualmente
-  var postadosSet = new Set();
-  drivePosted.forEach(function(k) { postadosSet.add(k); });
-  manualKeys.forEach(function(k)  { postadosSet.add(k); });
-
-  // Aguardando = gravado no Drive E não está em "postados" (nem Drive nem manual)
-  var aguardando = 0;
-  driveGravado.forEach(function(k) { if (!postadosSet.has(k)) aguardando++; });
-
-  var postados = postadosSet.size;
-  var naoGravados = driveNaoGrav.size;
-  // Se marcou manualmente algo que era "não gravado", deve sair de "não gravado"
-  manualKeys.forEach(function(k) { if (driveNaoGrav.has(k)) naoGravados--; });
-
-  var pct = total > 0 ? Math.round((postados / total) * 100) : 0;
-
-  // Atualiza as 4 células do dashboard
-  var cells = document.querySelectorAll('.dashboard .dash-cell');
-  if (cells[0]) {
-    var n0 = cells[0].querySelector('.dash-num');
-    if (n0) n0.innerHTML = postados + '<span class="dash-of">/' + total + '</span>';
-  }
-  if (cells[1]) {
-    var n1 = cells[1].querySelector('.dash-num');
-    if (n1) n1.textContent = aguardando;
-  }
-  if (cells[2]) {
-    var n2 = cells[2].querySelector('.dash-num');
-    if (n2) n2.textContent = naoGravados;
-  }
-  if (cells[3]) {
-    var n3 = cells[3].querySelector('.dash-num');
-    if (n3) n3.innerHTML = pct + '<span class="dash-of">%</span>';
-  }
-  // Barra de progresso
-  var bar = document.querySelector('.dash-bar-fill');
-  if (bar) bar.style.width = pct + '%';
-  // Contador inline da linha de marcações
-  var el = document.getElementById('manual-count');
-  if (el) el.innerText = manualKeys.length;
-
-  // Breakdown por série (uma linha por aba no dashboard + contagem no botão da aba)
   document.querySelectorAll('.tab-panel[data-series]').forEach(function(panel) {
     var sTotal = parseInt(panel.getAttribute('data-total'), 10) || 0;
     if (!sTotal) return; // série ainda sem conteúdo (ex.: live)
-    var sPosted = 0;
+
+    var postados = 0, aguardandoCt = 0, naoGravCt = 0, manualCt = 0;
     panel.querySelectorAll('.legenda').forEach(function(leg) {
-      var mBtn  = leg.querySelector('.manual-status');
-      var mCard = leg.querySelector('.video-card');
-      if (!mBtn || !mCard) return;
-      var ds = mCard.getAttribute('data-drive-status') || 'pendente';
-      if (ds === 'postado' || manualState[mBtn.dataset.key]) sPosted++;
+      var btn  = leg.querySelector('.manual-status');
+      var card = leg.querySelector('.video-card');
+      if (!btn || !card) return;
+      var ds = card.getAttribute('data-drive-status') || 'pendente';
+      var isManual = !!manualState[btn.dataset.key];
+      if (isManual) manualCt++;
+      if (ds === 'postado' || isManual) postados++;
+      else if (ds === 'gravado')        aguardandoCt++;
+      else                              naoGravCt++;
     });
+
+    var pct = Math.round((postados / sTotal) * 100);
+
+    // Atualiza o dashboard que vive DENTRO deste painel
+    var dash = panel.querySelector('.dashboard');
+    if (dash) {
+      var nums = dash.querySelectorAll('.dash-cell .dash-num');
+      if (nums[0]) nums[0].innerHTML = postados + '<span class="dash-of">/' + sTotal + '</span>';
+      if (nums[1]) nums[1].textContent = aguardandoCt;
+      if (nums[2]) nums[2].textContent = naoGravCt;
+      if (nums[3]) nums[3].innerHTML = pct + '<span class="dash-of">%</span>';
+      var bar = dash.querySelector('.dash-bar-fill');
+      if (bar) bar.style.width = pct + '%';
+      var mc = dash.querySelector('.dash-manual-count');
+      if (mc) mc.textContent = manualCt;
+    }
+
+    // Contagem no botão da aba
     var sName = panel.getAttribute('data-series');
-    var valEl = document.querySelector('[data-series-val="' + sName + '"]');
-    if (valEl) valEl.textContent = sPosted + '/' + sTotal;
     var tabCount = document.querySelector('.tab-btn[data-tab="' + sName + '"] .tab-count');
-    if (tabCount) tabCount.textContent = sPosted + '/' + sTotal + ' postados';
+    if (tabCount) tabCount.textContent = postados + '/' + sTotal + ' postados';
   });
 }
 
@@ -949,11 +886,21 @@ function toggleManualStatus(btn) {
   updateDashboardFromManual();
 }
 
-function resetManualStatus() {
-  if (!confirm('Tem certeza que deseja apagar TODAS as marcações manuais? Isso não afeta o Drive — só apaga o que você marcou no celular.')) return;
-  saveManualState({});
-  document.querySelectorAll('.manual-status').forEach(function(btn) {
-    applyManualState(btn, {});
+function resetManualStatus(series) {
+  // Limpa apenas as marcações manuais da série da aba onde o botão foi clicado.
+  var panel = series ? document.querySelector('.tab-panel[data-series="' + series + '"]') : null;
+  var scope = panel || document;
+  var msg = panel
+    ? 'Tem certeza que deseja apagar as marcações manuais DESTA ABA? Isso não afeta o Drive — só apaga o que você marcou no celular.'
+    : 'Tem certeza que deseja apagar TODAS as marcações manuais? Isso não afeta o Drive — só apaga o que você marcou no celular.';
+  if (!confirm(msg)) return;
+  var state = loadManualState();
+  scope.querySelectorAll('.manual-status').forEach(function(btn) {
+    delete state[btn.dataset.key];
+  });
+  saveManualState(state);
+  scope.querySelectorAll('.manual-status').forEach(function(btn) {
+    applyManualState(btn, state);
   });
   updateDashboardFromManual();
 }

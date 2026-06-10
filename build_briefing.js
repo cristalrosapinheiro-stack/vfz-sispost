@@ -286,9 +286,10 @@ adicione web fonts externos (restrição: arquivo único, zero rede).
     área de transferência (compatível com iOS Safari, Android, desktop).</li>
   <li><strong>Botão "MARCAR COMO POSTADO NO INSTAGRAM"</strong> — checkbox manual
     que o Vinícius marca pelo celular ao postar. Persiste em <code>localStorage</code>.</li>
-  <li><strong>Dashboard reativo</strong>: 4 contadores (POSTADOS, GRAVADOS aguardando,
-    NÃO GRAVADOS, % CONCLUÍDO) + barra de progresso + contador inline de
-    marcações manuais.</li>
+  <li><strong>Dashboard reativo POR ABA</strong>: cada aba tem seu próprio dashboard
+    no topo (título "PROGRESSO — [SÉRIE]") com 4 contadores da série (POSTADOS,
+    GRAVADOS aguardando, NÃO GRAVADOS, % CONCLUÍDO) + barra de progresso +
+    contador de marcações manuais + botão LIMPAR MARCAÇÕES que limpa só aquela série.</li>
   <li><strong>Preview embutido</strong> do vídeo via iframe do Drive (lazy load).</li>
   <li><strong>Sincronização badge ↔ checkbox</strong>: ao marcar manual, o badge
     "GRAVADO" (dourado) vira "POSTADO" (verde) na hora. Ao desmarcar, volta
@@ -311,7 +312,7 @@ múltiplos <code>.block</code> > <code>.block-title</code>, <code>.closing</code
 <span class="label">⚠ MANTER INTACTO</span>
 <p><strong>4.2 — Funções JS por nome:</strong></p>
 <pre>copyLegenda(btn)              togglePreview(id)
-toggleManualStatus(btn)       resetManualStatus()
+toggleManualStatus(btn)       resetManualStatus(seriesId)
 updateDashboardFromManual()   syncVideoCardWithManual(legenda, isManual)
 buildLegendaText(block)       copyViaTextarea(text)
 loadManualState()             saveManualState(state)
@@ -327,10 +328,10 @@ O sistema tem 3 abas: <code>#tab-main</code> (22 Práticos + 8 Motivacionais),
 <code>#tab-dicio</code> (8 Práticos do Dicionário) e <code>#tab-live</code>
 (Cortes da Live — placeholder "em preparação" por enquanto). Contratos:</p>
 <ul>
-  <li>Painéis: <code>&lt;section class="tab-panel" id="tab-{id}" data-series="{id}" data-total="{N}"&gt;</code> — o JS lê <code>data-series</code> e <code>data-total</code> para o breakdown do dashboard.</li>
+  <li>Painéis: <code>&lt;section class="tab-panel" id="tab-{id}" data-series="{id}" data-total="{N}"&gt;</code> — o JS lê <code>data-series</code> e <code>data-total</code> para recalcular os dashboards.</li>
   <li>Botões: <code>.tab-btn[data-tab="{id}"]</code> com filho <code>.tab-count</code> (contagem ao vivo).</li>
   <li>Aba ativa persiste em localStorage na chave <code>vfz_active_tab</code>.</li>
-  <li>Breakdown no dashboard: elementos com <code>data-series-val="{id}"</code>.</li>
+  <li><strong>Cada aba tem seu próprio dashboard</strong>: <code>.dashboard[data-dash="{id}"]</code> DENTRO do painel da série, com células <code>.dash-cell .dash-num</code>, barra <code>.dash-bar-fill</code> e contador <code>.dash-manual-count</code>. O JS atualiza por painel.</li>
   <li>Visual das abas é seu playground — estrutura/atributos não.</li>
 </ul>
 </div>
@@ -379,8 +380,7 @@ preciso fazer no update.js (ou comente os pontos de injeção com
 .copy-btn, .copy-btn.ok, .copy-btn.err
 .manual-status, .manual-status.checked
 .legenda.manual-checked
-.dashboard, .dash-cell, .dash-num, .dash-bar-fill
-#manual-count
+.dashboard[data-dash], .dash-cell, .dash-num, .dash-bar-fill, .dash-manual-count
 .preview-iframe, .preview-iframe.open
 .preview-toggle, .badge, .drive-link
 .num, .tag, .headline, .body, .opening, .block, .block-title, .closing, .cta-final
@@ -419,10 +419,11 @@ blocos. Hoje tá um pouco apertado, principalmente no mobile.</p>
 
 <div class="improve">
 <span class="label">✓ MELHORAR</span>
-<p><strong>5.5 — Dashboard.</strong> Reimagine visualmente. Manter os 4
-contadores (POSTADOS, AGUARDANDO, NÃO GRAVADO, %) + barra + linha de marcações
-manuais, mas o visual pode mudar totalmente. Considere donuts radiais, ring
-charts SVG, micro-sparkline da semana, etc. Mantenha responsivo.</p>
+<p><strong>5.5 — Dashboards (um por aba).</strong> Reimagine visualmente. Cada
+aba tem o seu, com os 4 contadores da série (POSTADOS, AGUARDANDO, NÃO GRAVADO, %)
++ barra + linha de marcações manuais + LIMPAR MARCAÇÕES da série. O visual pode
+mudar totalmente (donuts radiais, ring charts SVG, etc.), desde que continue um
+dashboard por aba e os seletores do item 4.2b funcionem. Mantenha responsivo.</p>
 </div>
 
 <div class="improve">
