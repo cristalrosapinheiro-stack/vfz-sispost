@@ -2,7 +2,8 @@
 const fs = require('fs');
 
 const src = fs.readFileSync('source/headlines.html', 'utf8')
-          + '\n' + fs.readFileSync('source/dicionario.html', 'utf8');
+          + '\n' + fs.readFileSync('source/dicionario.html', 'utf8')
+          + '\n' + fs.readFileSync('source/live.html', 'utf8');
 const deploy = fs.readFileSync('docs/index.html', 'utf8');
 
 // Extrai cada bloco .legenda (texto + estrutura, sem CSS/JS injetados)
@@ -10,11 +11,11 @@ function extractBlocks(html) {
   const blocks = {};
   // Match each <div class="legenda..."> ... </div> (até o próximo <!-- ============ ou final)
   // Captura tudo dentro do bloco
-  const re = /<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>[\s\S]*?(?=<!-- =|<div class="section-title|<\/section|<footer|$)/g;
+  const re = /<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE)\s+(\d+)<\/span>[\s\S]*?(?=<!-- =|<div class="section-title|<\/section|<footer|$)/g;
   let m;
   while ((m = re.exec(html)) !== null) {
     const tu = m[1].toUpperCase();
-    const type = tu.startsWith('PR') ? 'P' : tu.startsWith('DICIO') ? 'D' : 'M';
+    const type = tu.startsWith('PR') ? 'P' : tu.startsWith('DICIO') ? 'D' : tu.startsWith('CORTE') ? 'L' : 'M';
     const key  = type + m[2];
     // Para comparar, pega apenas o texto dentro de .headline, .opening, .block-title, .block, .closing, .cta-final
     const chunk = m[0];

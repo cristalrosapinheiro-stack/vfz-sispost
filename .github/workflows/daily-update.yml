@@ -1,0 +1,52 @@
+name: Daily update
+
+on:
+  schedule:
+    # 10:00 UTC = 07:00 BRT (Brasília)
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    # Permite disparar manualmente em Actions → Daily update → Run workflow
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run update.js (baixa Drive + gera HTML)
+        run: node update.js
+
+      - name: Check if anything changed
+        id: check
+        run: |
+          git add -A
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Nothing changed."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Changes detected:"
+            git diff --staged --stat
+          fi
+
+      - name: Commit & push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: auto-update $(date -u +'%Y-%m-%d %H:%MZ')"
+          git push

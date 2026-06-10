@@ -11,11 +11,13 @@ const FOLDER_POSTADOS = '1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl';
 // ── Série 2: Práticos do Dicionário ──
 const FOLDER_DICIO          = '1aoKnGLdlQCAXN6TAhCUnASEtMtRC0IfQ';
 const FOLDER_DICIO_POSTADOS = null; // TODO: quando a subpasta "postados" do dicionário existir, colocar o ID aqui
-// ── Série 3: Cortes da Live (aguardando pasta + legendas) ──
-const FOLDER_LIVE = null;
+// ── Série 3: Cortes da Live (Correção SEFAZ-GO 2026 — FCC) ──
+const FOLDER_LIVE          = '1Bpq8zxpBttY3HM1fwEz1nSX70ZiLi5kU';
+const FOLDER_LIVE_POSTADOS = null; // TODO: quando a subpasta "postados" da live existir, colocar o ID aqui
 
 const HTML_IN   = 'source/headlines.html';
 const DICIO_IN  = 'source/dicionario.html';
+const LIVE_IN   = 'source/live.html';
 const HTML_OUT  = 'docs/index.html';
 
 function fetchFolder(id, outFile) {
@@ -49,35 +51,56 @@ function keyOf(name) {
   return null;
 }
 
+// Os arquivos da pasta da live são numerados "1-Tema.mp4", "2-Tema.mp4"...
+// Esta função só é aplicada aos arquivos vindos da pasta da live (sem risco de colisão).
+function keyOfLive(name) {
+  const m = name.match(/^(\d+)\s*-/);
+  return m ? 'L' + m[1] : null;
+}
+
 const SKIP_FETCH = process.argv.includes('--cached');
-let allFiles, postFiles, dicioFiles, dicioPostFiles;
-if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json') && fs.existsSync('drive_dicio.json')) {
-  console.log('[1-3/4] Usando cache (drive_files.json / drive_postados.json / drive_dicio.json)');
+let allFiles, postFiles, dicioFiles, dicioPostFiles, liveFiles, livePostFiles;
+if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json') && fs.existsSync('drive_dicio.json') && fs.existsSync('drive_live.json')) {
+  console.log('[1-4/5] Usando cache (drive_files / drive_postados / drive_dicio / drive_live .json)');
   allFiles   = JSON.parse(fs.readFileSync('drive_files.json', 'utf8'));
   postFiles  = JSON.parse(fs.readFileSync('drive_postados.json', 'utf8'));
   dicioFiles = JSON.parse(fs.readFileSync('drive_dicio.json', 'utf8'));
   dicioPostFiles = fs.existsSync('drive_dicio_postados.json')
     ? JSON.parse(fs.readFileSync('drive_dicio_postados.json', 'utf8')) : [];
+  liveFiles  = JSON.parse(fs.readFileSync('drive_live.json', 'utf8'));
+  livePostFiles = fs.existsSync('drive_live_postados.json')
+    ? JSON.parse(fs.readFileSync('drive_live_postados.json', 'utf8')) : [];
 } else {
-  console.log('[1/4] Baixando pasta principal...');
+  console.log('[1/5] Baixando pasta principal...');
   const htmlAll  = fetchFolder(FOLDER_TODOS,    'drive_folder.html');
-  console.log('[2/4] Baixando subpasta postados...');
+  console.log('[2/5] Baixando subpasta postados...');
   const htmlPost = fetchFolder(FOLDER_POSTADOS, 'drive_postados.html');
-  console.log('[3/4] Baixando pasta do dicionário...');
+  console.log('[3/5] Baixando pasta do dicionário...');
   const htmlDicio = fetchFolder(FOLDER_DICIO,   'drive_dicio.html');
+  console.log('[4/5] Baixando pasta dos cortes da live...');
+  const htmlLive = fetchFolder(FOLDER_LIVE,     'drive_live.html');
   allFiles   = parseFiles(htmlAll);
   postFiles  = parseFiles(htmlPost);
   dicioFiles = parseFiles(htmlDicio);
+  liveFiles  = parseFiles(htmlLive);
   dicioPostFiles = [];
   if (FOLDER_DICIO_POSTADOS) {
-    console.log('[3b/4] Baixando subpasta postados do dicionário...');
+    console.log('[3b/5] Baixando subpasta postados do dicionário...');
     const htmlDicioPost = fetchFolder(FOLDER_DICIO_POSTADOS, 'drive_dicio_postados.html');
     dicioPostFiles = parseFiles(htmlDicioPost);
+  }
+  livePostFiles = [];
+  if (FOLDER_LIVE_POSTADOS) {
+    console.log('[4b/5] Baixando subpasta postados da live...');
+    const htmlLivePost = fetchFolder(FOLDER_LIVE_POSTADOS, 'drive_live_postados.html');
+    livePostFiles = parseFiles(htmlLivePost);
   }
   fs.writeFileSync('drive_files.json',    JSON.stringify(allFiles,  null, 2));
   fs.writeFileSync('drive_postados.json', JSON.stringify(postFiles, null, 2));
   fs.writeFileSync('drive_dicio.json',    JSON.stringify(dicioFiles, null, 2));
   fs.writeFileSync('drive_dicio_postados.json', JSON.stringify(dicioPostFiles, null, 2));
+  fs.writeFileSync('drive_live.json',     JSON.stringify(liveFiles, null, 2));
+  fs.writeFileSync('drive_live_postados.json', JSON.stringify(livePostFiles, null, 2));
 }
 
 // ── Série 1 (P/M) ──
@@ -90,8 +113,14 @@ const gravadoD = {}, postadoD = {};
 for (const f of dicioFiles)     { const k = keyOf(f.name); if (k && k[0] === 'D') gravadoD[k]  = f; }
 for (const f of dicioPostFiles) { const k = keyOf(f.name); if (k && k[0] === 'D') postadoD[k] = f; }
 
+// ── Série 3 (LIVE) ──
+const gravadoL = {}, postadoL = {};
+for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k) gravadoL[k]  = f; }
+for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k) postadoL[k] = f; }
+
 const TOTAL_MAIN  = 30;
 const TOTAL_DICIO = 8;
+const TOTAL_LIVE  = 2;
 
 const allRecorded = new Set([...Object.keys(gravado), ...Object.keys(postado)]);
 const aguardando  = [...Object.keys(gravado)].filter(k => !postado[k]).length;
@@ -101,14 +130,21 @@ const allRecordedD = new Set([...Object.keys(gravadoD), ...Object.keys(postadoD)
 const aguardandoD  = [...Object.keys(gravadoD)].filter(k => !postadoD[k]).length;
 const naoGravadosD = TOTAL_DICIO - allRecordedD.size;
 
-console.log('[4/4] Gerando HTML...');
+const allRecordedL = new Set([...Object.keys(gravadoL), ...Object.keys(postadoL)]);
+const aguardandoL  = [...Object.keys(gravadoL)].filter(k => !postadoL[k]).length;
+const naoGravadosL = TOTAL_LIVE - allRecordedL.size;
+
+console.log('[5/5] Gerando HTML...');
 console.log(`  [P+M]   POSTADOS: ${Object.keys(postado).length} → ${Object.keys(postado).sort().join(', ')}`);
 console.log(`  [P+M]   AGUARDANDO: ${aguardando} | NÃO GRAVADOS: ${naoGravados}`);
 console.log(`  [DICIO] POSTADOS: ${Object.keys(postadoD).length} → ${Object.keys(postadoD).sort().join(', ')}`);
 console.log(`  [DICIO] AGUARDANDO: ${aguardandoD} | NÃO GRAVADOS: ${naoGravadosD}`);
+console.log(`  [LIVE]  POSTADOS: ${Object.keys(postadoL).length} → ${Object.keys(postadoL).sort().join(', ')}`);
+console.log(`  [LIVE]  AGUARDANDO: ${aguardandoL} | NÃO GRAVADOS: ${naoGravadosL}`);
 
 let html = fs.readFileSync(HTML_IN, 'utf8');
 let dicioHtml = fs.readFileSync(DICIO_IN, 'utf8');
+let liveHtml  = fs.readFileSync(LIVE_IN, 'utf8');
 
 // Inject viewport meta if missing (essential for mobile rendering)
 if (!/<meta\s+name=["']viewport["']/i.test(html)) {
@@ -122,12 +158,13 @@ function typeToKeyPrefix(type) {
   const tu = type.toUpperCase();
   if (tu.startsWith('PR')) return 'P';
   if (tu.startsWith('DICIO')) return 'D';
+  if (tu.startsWith('CORTE')) return 'L';
   return 'M';
 }
 
 function extractHeadlines(htmlStr) {
   const out = {};
-  const re = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
+  const re = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
   let m;
   while ((m = re.exec(htmlStr)) !== null) {
     out[typeToKeyPrefix(m[1]) + m[2]] = m[3]
@@ -141,7 +178,8 @@ function extractHeadlines(htmlStr) {
 
 const headlines  = extractHeadlines(html);
 const headlinesD = extractHeadlines(dicioHtml);
-console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO)`);
+const headlinesL = extractHeadlines(liveHtml);
+console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO) + ${Object.keys(headlinesL).length} (LIVE)`);
 
 const cssInject = `
   /* === SISTEMA DE POSTAGENS === */
@@ -597,9 +635,10 @@ const ts = now.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' 
 function keyLabel(k) {
   if (k[0] === 'P') return 'PRÁTICO ' + k.slice(1);
   if (k[0] === 'M') return 'MOTIVACIONAL ' + k.slice(1);
+  if (k[0] === 'L') return 'CORTE ' + k.slice(1);
   return 'DICIO ' + k.slice(1);
 }
-const seriesOrder = { P: 0, M: 1, D: 2 };
+const seriesOrder = { P: 0, M: 1, D: 2, L: 3 };
 function sortKeys(keys) {
   return keys.sort((a, b) => {
     if (a[0] !== b[0]) return seriesOrder[a[0]] - seriesOrder[b[0]];
@@ -609,6 +648,7 @@ function sortKeys(keys) {
 
 const postMain  = Object.keys(postado).length;
 const postDicio = Object.keys(postadoD).length;
+const postLive  = Object.keys(postadoL).length;
 
 // Gera um dashboard individual por série — fica no topo da aba correspondente.
 function buildSeriesDashboard(seriesId, titulo, stats) {
@@ -657,18 +697,22 @@ const dashboardDicio = buildSeriesDashboard('dicio', 'PROGRESSO — DICIONÁRIO 
   postados: postDicio, total: TOTAL_DICIO, aguardando: aguardandoD, naoGravados: naoGravadosD,
   postadosKeys: Object.keys(postadoD)
 });
+const dashboardLive = buildSeriesDashboard('live', 'PROGRESSO — CORTES DA LIVE', {
+  postados: postLive, total: TOTAL_LIVE, aguardando: aguardandoL, naoGravados: naoGravadosL,
+  postadosKeys: Object.keys(postadoL)
+});
 
 const tabBar = `
 <div class="tab-bar" role="tablist">
   <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">${postMain}/${TOTAL_MAIN} postados</span></button>
   <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">${postDicio}/${TOTAL_DICIO} postados</span></button>
-  <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">em breve</span></button>
+  <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">${postLive}/${TOTAL_LIVE} postados</span></button>
 </div>
 `;
 
 function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
   return srcHtml.replace(
-  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO)\s+(\d+)<\/span>/g,
+  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE)\s+(\d+)<\/span>/g,
   (full, prefix, type, num) => {
     const key = typeToKeyPrefix(type) + num;
     const post = postadoMap[key];
@@ -718,6 +762,7 @@ function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
 // Injeta os cards em cada série (cada uma com seus mapas do Drive)
 html      = injectCards(html,      postado,  gravado,  headlines);
 dicioHtml = injectCards(dicioHtml, postadoD, gravadoD, headlinesD);
+liveHtml  = injectCards(liveHtml,  postadoL, gravadoL, headlinesL);
 
 // === MONTAGEM DAS ABAS ===
 // Painel 1 (main): envolve o conteúdo existente entre o header e o footer.
@@ -729,12 +774,9 @@ ${dicioHtml}
 </section>`;
 
 const painelLive = `
-<section class="tab-panel" id="tab-live" data-series="live" data-total="0" role="tabpanel">
-  <div class="coming-soon">
-    🎬 CORTES DA LIVE
-    <small>Em preparação — os vídeos e legendas desta série serão adicionados em breve.<br>
-    Assim que a pasta do Drive e as legendas estiverem prontas, esta aba será preenchida automaticamente.</small>
-  </div>
+<section class="tab-panel" id="tab-live" data-series="live" data-total="${TOTAL_LIVE}" role="tabpanel">
+${dashboardLive}
+${liveHtml}
 </section>`;
 
 html = html.replace(/(<\/header>)/, '$1\n' + tabBar +

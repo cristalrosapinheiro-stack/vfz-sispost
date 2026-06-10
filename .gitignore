@@ -1,0 +1,26 @@
+# Node
+node_modules/
+
+# Arquivos brutos baixados do Drive (regenerados a cada run)
+drive_folder.html
+drive_postados.html
+drive_dicio.html
+drive_dicio_postados.html
+drive_live.html
+drive_live_postados.html
+dicio_legendas.txt
+live_doc.txt
+
+# Cache de hash (gerado a cada run)
+.last_state_hash
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editores
+.vscode/
+.idea/
