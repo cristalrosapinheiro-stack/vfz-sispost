@@ -51,10 +51,12 @@ function keyOf(name) {
   return null;
 }
 
-// Os arquivos da pasta da live são numerados "1-Tema.mp4", "2-Tema.mp4"...
-// Esta função só é aplicada aos arquivos vindos da pasta da live (sem risco de colisão).
+// Os arquivos da pasta da live podem vir como "CORTE 3-Tema.mp4" (padrão atual)
+// ou "3-Tema.mp4" (padrão antigo). Esta função só é aplicada aos arquivos da live.
 function keyOfLive(name) {
-  const m = name.match(/^(\d+)\s*-/);
+  let m = name.match(/^CORTE\s*(\d+)\s*-/i);  // "CORTE 3-..." / "CORTE3-..."
+  if (m) return 'L' + m[1];
+  m = name.match(/^(\d+)\s*-/);               // fallback: "3-..."
   return m ? 'L' + m[1] : null;
 }
 
@@ -114,13 +116,20 @@ for (const f of dicioFiles)     { const k = keyOf(f.name); if (k && k[0] === 'D'
 for (const f of dicioPostFiles) { const k = keyOf(f.name); if (k && k[0] === 'D') postadoD[k] = f; }
 
 // ── Série 3 (LIVE) ──
+// A série da live é aberta (cresce conforme cortes são adicionados). O "total"
+// é o número de legendas definidas em source/live.html. Vídeos no Drive que
+// ainda não têm legenda (ex.: CORTE 0) são ignorados — não contam como "gravado".
+const plannedLiveKeys = new Set(
+  (fs.readFileSync(LIVE_IN, 'utf8').match(/<span class="num">CORTE\s+(\d+)<\/span>/gi) || [])
+    .map(s => 'L' + s.match(/(\d+)/)[1])
+);
 const gravadoL = {}, postadoL = {};
-for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k) gravadoL[k]  = f; }
-for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k) postadoL[k] = f; }
+for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) gravadoL[k]  = f; }
+for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) postadoL[k] = f; }
 
 const TOTAL_MAIN  = 30;
 const TOTAL_DICIO = 8;
-const TOTAL_LIVE  = 2;
+const TOTAL_LIVE  = plannedLiveKeys.size;
 
 const allRecorded = new Set([...Object.keys(gravado), ...Object.keys(postado)]);
 const aguardando  = [...Object.keys(gravado)].filter(k => !postado[k]).length;
