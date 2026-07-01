@@ -609,13 +609,13 @@
 <div class="tab-bar" role="tablist">
   <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">7/30 postados</span></button>
   <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">0/8 postados</span></button>
-  <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">0/3 postados</span></button>
+  <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">0/4 postados</span></button>
 </div>
 <section class="tab-panel active" id="tab-main" data-series="main" data-total="30" role="tabpanel">
 <div class="dashboard" data-dash="main">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — PRÁTICOS + MOTIVACIONAIS</span>
-    <span class="dash-ts">Atualizado em 01/07/2026, 12:29</span>
+    <span class="dash-ts">Atualizado em 01/07/2026, 18:56</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
@@ -1987,7 +1987,7 @@
 <div class="dashboard" data-dash="dicio">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — DICIONÁRIO CONTÁBIL</span>
-    <span class="dash-ts">Atualizado em 01/07/2026, 12:29</span>
+    <span class="dash-ts">Atualizado em 01/07/2026, 18:56</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
@@ -2402,20 +2402,20 @@
 
 </section>
 
-<section class="tab-panel" id="tab-live" data-series="live" data-total="3" role="tabpanel">
+<section class="tab-panel" id="tab-live" data-series="live" data-total="4" role="tabpanel">
 
 <div class="dashboard" data-dash="live">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — CORTES DA LIVE</span>
-    <span class="dash-ts">Atualizado em 01/07/2026, 12:29</span>
+    <span class="dash-ts">Atualizado em 01/07/2026, 18:56</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
-      <div class="dash-num">0<span class="dash-of">/3</span></div>
+      <div class="dash-num">0<span class="dash-of">/4</span></div>
       <div class="dash-label">POSTADOS</div>
     </div>
     <div class="dash-cell">
-      <div class="dash-num">3</div>
+      <div class="dash-num">4</div>
       <div class="dash-label">GRAVADOS<br>aguardando</div>
     </div>
     <div class="dash-cell">
@@ -2430,7 +2430,7 @@
   <div class="dash-bar"><div class="dash-bar-fill" style="width:0%"></div></div>
   
   <div class="dash-manual">
-    <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count">0</span><span style="opacity:.6;font-weight:600;"> / 3</span></span>
+    <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count">0</span><span style="opacity:.6;font-weight:600;"> / 4</span></span>
     <button class="dash-manual-reset" onclick="resetManualStatus('live')" type="button">LIMPAR MARCAÇÕES</button>
   </div>
 </div>
@@ -2441,17 +2441,48 @@
      Live completa: https://www.youtube.com/watch?v=tTuDnyEJoS8
      Doc da série no Drive: 1erPK70UUCNPM0aZnr66xynnM-pMSHJGZxiHDyaruDCc
      Este arquivo é um FRAGMENTO — o update.js injeta no painel da aba.
+
+     Fonte dos textos: Google Doc oficial (CORTE 0, 1, 2 = texto do Vinícius).
+     CORTE 3 = rascunho (Vinícius ainda não escreveu o oficial no doc).
      ============================================================ -->
 
 <div class="section-title">
   Cortes da Live · Correção SEFAZ-GO 2026
-  <small>Cortes da live de correção (FCC) · CTA fixo da série no rodapé de cada legenda</small>
+  <small>Cortes da live de correção (FCC) · CTA padrão da marca no rodapé de cada legenda</small>
 </div>
 
 <div class="cta-box">
   <h2>CTA padrão da série</h2>
   <div class="cta-option">
-    Existem dois tipos de candidato lendo isso: o que estuda contabilidade pra passar, e o que estuda pra escolher o cargo. Um deles segue @prof.viniciusferraz.
+    Contabilidade não precisa ser seu ponto fraco. Siga @prof.viniciusferraz e transforme a disciplina que te trava na que te aprova.
+  </div>
+</div>
+
+<!-- ============ L0 ============ -->
+<div class="legenda">
+  <button class="copy-btn" data-key="L0" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">CORTE 0</span>
+      <div class="video-card gravado" data-drive-status="gravado">
+        <span class="badge">GRAVADO</span>
+        <a class="drive-link" href="https://drive.google.com/file/d/1wwWq-2WINo84APDDca40teNgY9E2sS8E/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: CORTE 0-Mudança_de_estimativa_contabil_vs_política_contabil (1).mp4">CORTE 0 — Mudança de método de depreciação tem cara de mudança de política contábil — mas é mudança de estimativa. E ...</a>
+        <button class="preview-toggle" onclick="togglePreview('iframe_L0')">PREVIEW</button>
+      </div>
+      <iframe class="preview-iframe" id="iframe_L0" data-src="https://drive.google.com/file/d/1wwWq-2WINo84APDDca40teNgY9E2sS8E/preview" loading="lazy"></iframe>
+      <button class="manual-status" data-key="L0" onclick="toggleManualStatus(this)" type="button">
+        <span class="ms-check">⬜</span>
+        <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
+        <span class="ms-date"></span>
+      </button>
+      <span class="tag">[pílula · CPC 27 · estimativa vs política]</span>
+  <div class="headline">Mudança de método de depreciação tem cara de mudança de política contábil — mas é mudança de estimativa. E a FGV já derrubou muita gente nisso.</div>
+  <div class="body">
+    <div class="opening">
+      Comece seu dia com essa pílula contábil aqui!<br><br>
+      Se vc não ta por dentro da polêmica: mudança de método de depreciação tem cheiro e cara de mudança de política contábil, mas a verdade é que não é!<br><br>
+      O método de depreciação deve refletir a estimativa do padrão de consumo do ativo imobilizado e só será modificado se houver mudança nessa estimativa do padrão de consumo.<br><br>
+      Como o padrão de consumo é estimado, o método de depreciação também é! 👀<br><br>
+      Fica a dica, mudança de método de depreciação é SEMPRE mudança de estimativa, mesmo que mude um ou vários imobilizados, até pq o CPC 27 afirma que essa definição deve ser feita de ativo para ativo!<br><br>
+      FGV já tinha se ligado nessa maldade e lá por volta de 2022/2023 elaborou boas questões que derrubaram muitos bons(oas) candidatos(as)!
+    </div>
   </div>
 </div>
 
@@ -2460,7 +2491,7 @@
   <button class="copy-btn" data-key="L1" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">CORTE 1</span>
       <div class="video-card gravado" data-drive-status="gravado">
         <span class="badge">GRAVADO</span>
-        <a class="drive-link" href="https://drive.google.com/file/d/1ODW7rIy0moiEczDmxr3PSf28ytkB6BMZ/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: CORTE 1-INSS_na_DVA_Pessoal_ou_Governo.mp4">CORTE 1 — Na correção da SEFAZ-GO, essa questão de DVA dividiu a live: o INSS vai em Pessoal ou em Governo? Quem resp...</a>
+        <a class="drive-link" href="https://drive.google.com/file/d/1ODW7rIy0moiEczDmxr3PSf28ytkB6BMZ/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: CORTE 1-INSS_na_DVA_Pessoal_ou_Governo.mp4">CORTE 1 — INSS na DVA: Pessoal ou do Governo?</a>
         <button class="preview-toggle" onclick="togglePreview('iframe_L1')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L1" data-src="https://drive.google.com/file/d/1ODW7rIy0moiEczDmxr3PSf28ytkB6BMZ/preview" loading="lazy"></iframe>
@@ -2469,38 +2500,40 @@
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
         <span class="ms-date"></span>
       </button>
-      <span class="tag">[cena · pegadinha · DVA]</span>
-  <div class="headline">Na correção da SEFAZ-GO, essa questão de DVA dividiu a live: o INSS vai em Pessoal ou em Governo? Quem respondeu no instinto, errou.</div>
+      <span class="tag">[INSS · DRE · retenção vs despesa]</span>
+  <div class="headline">INSS na DVA: Pessoal ou do Governo?</div>
   <div class="body">
     <div class="opening">
-      Essa dúvida apareceu ao vivo na correção da SEFAZ-GO 2026 — e ela derruba gente boa em toda prova da FCC.<br>
-      A DVA — Demonstração do Valor Adicionado — mostra a riqueza que a empresa gerou e para quem essa riqueza foi distribuída. E é exatamente na distribuição que mora a pegadinha.
+      Existe uma confusão muito comum em contabilidade que a banca fiscal adora explorar.<br>
+      O INSS tem dois lados. E só um deles é despesa da empresa.<br>
+      Quem não distingue os dois chega na DRE e erra por razão técnica — não por falta de estudo.
     </div>
     <div class="block">
-      <div class="block-title">1- O QUE A BANCA REALMENTE COBRA</div>
-      Ninguém perde ponto por não saber a definição de DVA. O candidato cai quando precisa dizer ONDE cada valor entra: Pessoal, Governo, Capital de Terceiros ou Capital Próprio. A FCC monta a questão inteira em cima de uma única linha mal classificada.
+      <div class="block-title">1. OS DOIS LADOS DO INSS</div>
+      O patronal é contribuição da empresa para a previdência. O do empregado é contribuição do próprio trabalhador para a aposentadoria dele. Nomes parecidos, naturezas opostas.
     </div>
     <div class="block">
-      <div class="block-title">2- A INTUIÇÃO QUE TE TRAI</div>
-      INSS é encargo sobre a folha. Encargo de funcionário parece "Pessoal" — e é assim que a maioria responde. A banca sabe disso. A alternativa errada está lá esperando, escrita do jeito que o seu instinto gostaria de ler.
+      <div class="block-title">2. O QUE A EMPRESA FAZ COM O INSS DO EMPREGADO</div>
+      Ela não paga — apenas retém. Desconta do salário bruto, repassa para a previdência e entrega o líquido. A empresa é só intermediária no caminho do dinheiro do trabalhador.
     </div>
     <div class="block">
-      <div class="block-title">3- A REGRA DO CPC 09</div>
-      O INSS patronal vai em IMPOSTOS, TAXAS E CONTRIBUIÇÕES — distribuição ao GOVERNO. O critério não é "onde a despesa nasce". É QUEM RECEBE a riqueza. E quem recebe o INSS é o Estado, não o seu empregado.
+      <div class="block-title">3. POR QUE ISSO NÃO APARECE NA DRE</div>
+      Retenção não consome recurso da empresa. O valor vai ao passivo e reduz o salário a pagar — não existe linha de despesa, não há impacto na DRE.
     </div>
     <div class="block">
-      <div class="block-title">4- POR QUE O FGTS É DIFERENTE</div>
-      O FGTS fica em PESSOAL. O depósito cai na conta vinculada do trabalhador — o beneficiário direto é ele. Mesmo raciocínio, destinos opostos. E a FCC adora cobrar os dois na mesma questão pra ver quem entendeu o critério e quem decorou lista.
+      <div class="block-title">4. O QUE GERA DESPESA DE VERDADE</div>
+      O INSS patronal. Esse a empresa paga com recurso próprio e aparece na DRE como despesa com pessoal, junto com FGTS, férias e 13º.
     </div>
     <div class="block">
-      <div class="block-title">5- O RACIOCÍNIO QUE RESOLVE QUALQUER VARIAÇÃO</div>
-      Pergunta única: para o bolso de quem essa riqueza vai? Empregado → Pessoal. Estado → Governo. Banco → Capital de Terceiros. Sócio → Capital Próprio. Com esse filtro, qualquer roupagem nova da banca vira questão de 20 segundos.
+      <div class="block-title">5. ONDE A BANCA EXPLORA ISSO</div>
+      A questão mistura os dois no enunciado e pede o impacto na DRE. Quem entende a lógica elimina o repasse na hora. Quem decorou inclui os dois — e erra questão que parecia fácil.
     </div>
     <div class="closing">
-      Quem decora classificação, refaz o estudo a cada prova.<br>
-      Quem entende o destino da riqueza, nunca mais erra DVA.
+      - INSS patronal: despesa da empresa. Aparece na DRE.<br>
+      - INSS do empregado: retenção do trabalhador. Passa pela empresa, não gera despesa, não tem linha na DRE.<br><br>
+      Uma distinção técnica. Resultado completamente diferente na demonstração.
     </div>
-    <div class="cta-final">Existem dois tipos de candidato lendo isso: o que estuda contabilidade pra passar, e o que estuda pra escolher o cargo. Um deles segue @prof.viniciusferraz.</div>
+    <div class="cta-final">Contabilidade não precisa ser seu ponto fraco. Siga @prof.viniciusferraz e transforme a disciplina que te trava na que te aprova.<br><br>OBS: A Aula completa encontra-se no meu canal do YouTube: Prof. Vinicius Ferraz. (Link na Bio)</div>
   </div>
 </div>
 
@@ -2509,7 +2542,7 @@
   <button class="copy-btn" data-key="L2" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">CORTE 2</span>
       <div class="video-card gravado" data-drive-status="gravado">
         <span class="badge">GRAVADO</span>
-        <a class="drive-link" href="https://drive.google.com/file/d/1_3X0nu-sUC_G_zNu-gdz1eXcJAEuPqNC/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: CORTE 2-Depreciação_no_Arrendamento.mp4">CORTE 2 — Contrato de 5 anos, vida útil de 10. Você deprecia por quanto tempo? A FCC montou essa questão na SEFAZ-GO ...</a>
+        <a class="drive-link" href="https://drive.google.com/file/d/1_3X0nu-sUC_G_zNu-gdz1eXcJAEuPqNC/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: CORTE 2-Depreciação_no_Arrendamento.mp4">CORTE 2 — Depreciação no Arrendamento Financeiro</a>
         <button class="preview-toggle" onclick="togglePreview('iframe_L2')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L2" data-src="https://drive.google.com/file/d/1_3X0nu-sUC_G_zNu-gdz1eXcJAEuPqNC/preview" loading="lazy"></iframe>
@@ -2518,41 +2551,44 @@
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
         <span class="ms-date"></span>
       </button>
-      <span class="tag">[dare · pegadinha · CPC 06]</span>
-  <div class="headline">Contrato de 5 anos, vida útil de 10. Você deprecia por quanto tempo? A FCC montou essa questão na SEFAZ-GO sabendo que você ia errar.</div>
+      <span class="tag">[arrendamento · CPC 06 · essência sobre forma]</span>
+  <div class="headline">Depreciação no Arrendamento Financeiro</div>
   <div class="body">
     <div class="opening">
-      Esse corte é da correção ao vivo da SEFAZ-GO 2026 — e mostra a armadilha mais elegante que o CPC 06 oferece pra banca.<br>
-      No arrendamento, você reconhece um ativo de direito de uso e precisa depreciar. O enunciado te dá DOIS prazos: o do contrato e a vida útil do bem. A questão inteira se decide em qual dos dois você escolhe.
+      Arrendamento financeiro não é aluguel. É compra financiada disfarçada de contrato de locação.<br>
+      E quem não entende isso erra a depreciação por um detalhe que decide a questão inteira.
     </div>
     <div class="block">
-      <div class="block-title">1- A REGRA GERAL</div>
-      Se o contrato NÃO transfere a propriedade do bem ao final: deprecia pelo MENOR prazo entre o contrato de arrendamento e a vida útil. Contrato de 5 anos, vida útil de 10 — deprecia em 5.
+      <div class="block-title">1. ESSÊNCIA SOBRE A FORMA</div>
+      O nome diz "arrendamento", mas a essência é financiamento. Quando o valor residual da opção de compra é muito menor que o valor justo, ninguém devolve o bem — você vai exercer a compra. Não está alugando: está financiando.
     </div>
     <div class="block">
-      <div class="block-title">2- A EXCEÇÃO QUE INVERTE TUDO</div>
-      Se o contrato transfere a propriedade ao final — ou se existe razoável certeza de que a opção de compra será exercida — deprecia pela VIDA ÚTIL do ativo. Os mesmos números, e a resposta vira 10 anos.
+      <div class="block-title">2. SE É COMPRA, O ATIVO É SEU</div>
+      A responsabilidade passa a ser do arrendatário. É você quem registra o bem no ativo, arca com as manutenções e — o ponto-chave — deprecia. Como dono, não como locatário.
     </div>
     <div class="block">
-      <div class="block-title">3- ONDE O CANDIDATO CAI</div>
-      A informação da opção de compra vem escondida no meio do enunciado, numa linha que parece decorativa. Quem lê correndo aplica a regra geral num caso de exceção — e erra com convicção. É o pior tipo de erro: o que você nem desconfia.
+      <div class="block-title">3. A PERGUNTA QUE DECIDE A QUESTÃO</div>
+      Por qual prazo depreciar? O contrato é de 60 meses. A política da empresa prevê usar o equipamento por 8 anos, ou seja, 96 meses. São dois números — e só um está certo.
     </div>
     <div class="block">
-      <div class="block-title">4- A LÓGICA QUE DISPENSA DECOREBA</div>
-      Se o bem vai ser seu no final, você vai consumi-lo pela vida útil inteira — então deprecia pela vida útil. Se vai devolver, você só consome o bem enquanto o contrato durar — então deprecia pelo menor prazo. Entendeu isso, não existe variação da FCC que te pegue.
+      <div class="block-title">4. A REGRA QUE A BANCA TESTA</div>
+      Havendo razoável certeza de que o bem vai ficar com você ao final, deprecia pela vida útil do ativo. Só quando não existe essa certeza é que se usa o menor prazo entre contrato e vida útil.
     </div>
     <div class="block">
-      <div class="block-title">5- POR QUE ISSO VALE MAIS QUE O CÁLCULO</div>
-      A conta da depreciação qualquer um faz. O ponto que decide a questão é escolher o prazo certo ANTES de calcular. A banca não está testando matemática — está testando se você leu o contrato como um auditor leria.
+      <div class="block-title">5. ONDE O CANDIDATO CAI</div>
+      A opção de compra é vantajosa demais para ser recusada — logo, há certeza de que o bem será seu. Deprecia por 96 meses, a vida útil. Quem deprecia pelos 60 meses do contrato pega o número que a banca deixou ali de isca.
     </div>
     <div class="closing">
-      Na prova, o tempo que você economiza numa questão dessas é o tempo que sobra pra fechar a que vale a sua classificação.
+      60 meses é o contrato. 96 é a vida útil.<br>
+      Como o bem vai virar seu, a depreciação segue a vida útil — não o prazo do contrato.<br>
+      Essência sobre a forma decide a questão antes da conta.
     </div>
-    <div class="cta-final">Existem dois tipos de candidato lendo isso: o que estuda contabilidade pra passar, e o que estuda pra escolher o cargo. Um deles segue @prof.viniciusferraz.</div>
+    <div class="cta-final">Contabilidade não precisa ser seu ponto fraco. Siga @prof.viniciusferraz e transforme a disciplina que te trava na que te aprova.</div>
   </div>
 </div>
 
 <!-- ============ L3 ============ -->
+<!-- RASCUNHO: Vinícius ainda não escreveu a legenda oficial no doc. Substituir quando disponível. -->
 <div class="legenda">
   <button class="copy-btn" data-key="L3" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">CORTE 3</span>
       <div class="video-card gravado" data-drive-status="gravado">
@@ -2597,7 +2633,7 @@
       Essa é a questão que separa quem decorou "salário vezes 12" de quem entende como a obrigação trabalhista realmente se acumula.<br>
       E na prova fiscal, essa diferença vale ponto.
     </div>
-    <div class="cta-final">Existem dois tipos de candidato lendo isso: o que estuda contabilidade pra passar, e o que estuda pra escolher o cargo. Um deles segue @prof.viniciusferraz.</div>
+    <div class="cta-final">Contabilidade não precisa ser seu ponto fraco. Siga @prof.viniciusferraz e transforme a disciplina que te trava na que te aprova.</div>
   </div>
 </div>
 
