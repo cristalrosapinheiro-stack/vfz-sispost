@@ -5,9 +5,12 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-// ── Série 1: Práticos + Motivacionais ──
+// ── Série 1: Práticos + Motivacionais (MÊS 1) ──
 const FOLDER_TODOS    = '1ZXq4tc08ezjnnC-t8gRbbYslWVIkDhh0';
 const FOLDER_POSTADOS = '1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl';
+// ── Série "MÊS 2": Práticos (23–52) + Motivacionais (9–16) — Lote Julho/2026 ──
+const FOLDER_MES2          = '1wrZXz78E03r1-h59wZRPXWNX18XGNyvn';
+const FOLDER_MES2_POSTADOS = null; // TODO: quando a subpasta "postados" do MÊS 2 existir, colocar o ID aqui
 // ── Série 2: Práticos do Dicionário ──
 const FOLDER_DICIO          = '1aoKnGLdlQCAXN6TAhCUnASEtMtRC0IfQ';
 const FOLDER_DICIO_POSTADOS = null; // TODO: quando a subpasta "postados" do dicionário existir, colocar o ID aqui
@@ -16,6 +19,7 @@ const FOLDER_LIVE          = '1Bpq8zxpBttY3HM1fwEz1nSX70ZiLi5kU';
 const FOLDER_LIVE_POSTADOS = null; // TODO: quando a subpasta "postados" da live existir, colocar o ID aqui
 
 const HTML_IN   = 'source/headlines.html';
+const MES2_IN   = 'source/headlines_mes2.html';
 const DICIO_IN  = 'source/dicionario.html';
 const LIVE_IN   = 'source/live.html';
 const HTML_OUT  = 'docs/index.html';
@@ -60,31 +64,40 @@ function keyOfLive(name) {
   return m ? 'L' + m[1] : null;
 }
 
+// Lê um JSON de cache do Drive; se o arquivo não existir ainda, devolve [].
+function readCache(file) {
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : [];
+}
+
 const SKIP_FETCH = process.argv.includes('--cached');
-let allFiles, postFiles, dicioFiles, dicioPostFiles, liveFiles, livePostFiles;
+let allFiles, postFiles, dicioFiles, dicioPostFiles, liveFiles, livePostFiles, mes2Files, mes2PostFiles;
 if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json') && fs.existsSync('drive_dicio.json') && fs.existsSync('drive_live.json')) {
-  console.log('[1-4/5] Usando cache (drive_files / drive_postados / drive_dicio / drive_live .json)');
+  console.log('[cache] Usando cache (drive_files / drive_postados / drive_dicio / drive_live / drive_mes2 .json)');
   allFiles   = JSON.parse(fs.readFileSync('drive_files.json', 'utf8'));
   postFiles  = JSON.parse(fs.readFileSync('drive_postados.json', 'utf8'));
   dicioFiles = JSON.parse(fs.readFileSync('drive_dicio.json', 'utf8'));
-  dicioPostFiles = fs.existsSync('drive_dicio_postados.json')
-    ? JSON.parse(fs.readFileSync('drive_dicio_postados.json', 'utf8')) : [];
+  dicioPostFiles = readCache('drive_dicio_postados.json');
   liveFiles  = JSON.parse(fs.readFileSync('drive_live.json', 'utf8'));
-  livePostFiles = fs.existsSync('drive_live_postados.json')
-    ? JSON.parse(fs.readFileSync('drive_live_postados.json', 'utf8')) : [];
+  livePostFiles = readCache('drive_live_postados.json');
+  // MÊS 2 é pasta nova — pode ainda não ter cache. Lê defensivo.
+  mes2Files     = readCache('drive_mes2.json');
+  mes2PostFiles = readCache('drive_mes2_postados.json');
 } else {
-  console.log('[1/5] Baixando pasta principal...');
+  console.log('[1/5] Baixando pasta principal (MÊS 1)...');
   const htmlAll  = fetchFolder(FOLDER_TODOS,    'drive_folder.html');
-  console.log('[2/5] Baixando subpasta postados...');
+  console.log('[2/5] Baixando subpasta postados (MÊS 1)...');
   const htmlPost = fetchFolder(FOLDER_POSTADOS, 'drive_postados.html');
   console.log('[3/5] Baixando pasta do dicionário...');
   const htmlDicio = fetchFolder(FOLDER_DICIO,   'drive_dicio.html');
   console.log('[4/5] Baixando pasta dos cortes da live...');
   const htmlLive = fetchFolder(FOLDER_LIVE,     'drive_live.html');
+  console.log('[5/5] Baixando pasta do MÊS 2...');
+  const htmlMes2 = fetchFolder(FOLDER_MES2,     'drive_mes2.html');
   allFiles   = parseFiles(htmlAll);
   postFiles  = parseFiles(htmlPost);
   dicioFiles = parseFiles(htmlDicio);
   liveFiles  = parseFiles(htmlLive);
+  mes2Files  = parseFiles(htmlMes2);
   dicioPostFiles = [];
   if (FOLDER_DICIO_POSTADOS) {
     console.log('[3b/5] Baixando subpasta postados do dicionário...');
@@ -97,18 +110,32 @@ if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_post
     const htmlLivePost = fetchFolder(FOLDER_LIVE_POSTADOS, 'drive_live_postados.html');
     livePostFiles = parseFiles(htmlLivePost);
   }
+  mes2PostFiles = [];
+  if (FOLDER_MES2_POSTADOS) {
+    console.log('[5b/5] Baixando subpasta postados do MÊS 2...');
+    const htmlMes2Post = fetchFolder(FOLDER_MES2_POSTADOS, 'drive_mes2_postados.html');
+    mes2PostFiles = parseFiles(htmlMes2Post);
+  }
   fs.writeFileSync('drive_files.json',    JSON.stringify(allFiles,  null, 2));
   fs.writeFileSync('drive_postados.json', JSON.stringify(postFiles, null, 2));
   fs.writeFileSync('drive_dicio.json',    JSON.stringify(dicioFiles, null, 2));
   fs.writeFileSync('drive_dicio_postados.json', JSON.stringify(dicioPostFiles, null, 2));
   fs.writeFileSync('drive_live.json',     JSON.stringify(liveFiles, null, 2));
   fs.writeFileSync('drive_live_postados.json', JSON.stringify(livePostFiles, null, 2));
+  fs.writeFileSync('drive_mes2.json',     JSON.stringify(mes2Files, null, 2));
+  fs.writeFileSync('drive_mes2_postados.json', JSON.stringify(mes2PostFiles, null, 2));
 }
 
-// ── Série 1 (P/M) ──
+// ── Série 1 (P/M) — MÊS 1 ──
 const gravado = {}, postado = {};
 for (const f of allFiles)  { const k = keyOf(f.name); if (k && k[0] !== 'D') gravado[k]  = f; }
 for (const f of postFiles) { const k = keyOf(f.name); if (k && k[0] !== 'D') postado[k] = f; }
+
+// ── MÊS 2 (P/M, lote Julho/2026: P23–P52, M9–M16) ──
+// Pasta própria no Drive → mapas separados; as chaves não colidem com o MÊS 1.
+const gravadoMes2 = {}, postadoMes2 = {};
+for (const f of mes2Files)     { const k = keyOf(f.name); if (k && k[0] !== 'D') gravadoMes2[k]  = f; }
+for (const f of mes2PostFiles) { const k = keyOf(f.name); if (k && k[0] !== 'D') postadoMes2[k] = f; }
 
 // ── Série 2 (DICIO) ──
 const gravadoD = {}, postadoD = {};
@@ -128,12 +155,17 @@ for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k && plannedLi
 for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) postadoL[k] = f; }
 
 const TOTAL_MAIN  = 30;
+const TOTAL_MES2  = 38; // 30 Práticos (23–52) + 8 Motivacionais (9–16)
 const TOTAL_DICIO = 8;
 const TOTAL_LIVE  = plannedLiveKeys.size;
 
 const allRecorded = new Set([...Object.keys(gravado), ...Object.keys(postado)]);
 const aguardando  = [...Object.keys(gravado)].filter(k => !postado[k]).length;
 const naoGravados = TOTAL_MAIN - allRecorded.size;
+
+const allRecordedMes2 = new Set([...Object.keys(gravadoMes2), ...Object.keys(postadoMes2)]);
+const aguardandoMes2  = [...Object.keys(gravadoMes2)].filter(k => !postadoMes2[k]).length;
+const naoGravadosMes2 = TOTAL_MES2 - allRecordedMes2.size;
 
 const allRecordedD = new Set([...Object.keys(gravadoD), ...Object.keys(postadoD)]);
 const aguardandoD  = [...Object.keys(gravadoD)].filter(k => !postadoD[k]).length;
@@ -152,6 +184,7 @@ console.log(`  [LIVE]  POSTADOS: ${Object.keys(postadoL).length} → ${Object.ke
 console.log(`  [LIVE]  AGUARDANDO: ${aguardandoL} | NÃO GRAVADOS: ${naoGravadosL}`);
 
 let html = fs.readFileSync(HTML_IN, 'utf8');
+let mes2Html  = fs.readFileSync(MES2_IN, 'utf8');
 let dicioHtml = fs.readFileSync(DICIO_IN, 'utf8');
 let liveHtml  = fs.readFileSync(LIVE_IN, 'utf8');
 
@@ -185,9 +218,10 @@ function extractHeadlines(htmlStr) {
   return out;
 }
 
-const headlines  = extractHeadlines(html);
-const headlinesD = extractHeadlines(dicioHtml);
-const headlinesL = extractHeadlines(liveHtml);
+const headlines     = extractHeadlines(html);
+const headlinesMes2 = extractHeadlines(mes2Html);
+const headlinesD    = extractHeadlines(dicioHtml);
+const headlinesL    = extractHeadlines(liveHtml);
 console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO) + ${Object.keys(headlinesL).length} (LIVE)`);
 
 const cssInject = `
@@ -656,6 +690,7 @@ function sortKeys(keys) {
 }
 
 const postMain  = Object.keys(postado).length;
+const postMes2  = Object.keys(postadoMes2).length;
 const postDicio = Object.keys(postadoD).length;
 const postLive  = Object.keys(postadoL).length;
 
@@ -698,9 +733,13 @@ function buildSeriesDashboard(seriesId, titulo, stats) {
 `;
 }
 
-const dashboardMain = buildSeriesDashboard('main', 'PROGRESSO — PRÁTICOS + MOTIVACIONAIS', {
+const dashboardMain = buildSeriesDashboard('main', 'PROGRESSO — MÊS 1 · PRÁTICOS + MOTIVACIONAIS', {
   postados: postMain, total: TOTAL_MAIN, aguardando, naoGravados,
   postadosKeys: Object.keys(postado)
+});
+const dashboardMes2 = buildSeriesDashboard('mes2', 'PROGRESSO — MÊS 2 · PRÁTICOS + MOTIVACIONAIS', {
+  postados: postMes2, total: TOTAL_MES2, aguardando: aguardandoMes2, naoGravados: naoGravadosMes2,
+  postadosKeys: Object.keys(postadoMes2)
 });
 const dashboardDicio = buildSeriesDashboard('dicio', 'PROGRESSO — DICIONÁRIO CONTÁBIL', {
   postados: postDicio, total: TOTAL_DICIO, aguardando: aguardandoD, naoGravados: naoGravadosD,
@@ -713,7 +752,8 @@ const dashboardLive = buildSeriesDashboard('live', 'PROGRESSO — CORTES DA LIVE
 
 const tabBar = `
 <div class="tab-bar" role="tablist">
-  <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">${postMain}/${TOTAL_MAIN} postados</span></button>
+  <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">MÊS 1 · Práticos+Motiv<span class="tab-count">${postMain}/${TOTAL_MAIN} postados</span></button>
+  <button class="tab-btn" data-tab="mes2" onclick="switchTab('mes2')" type="button">MÊS 2 · Práticos+Motiv<span class="tab-count">${postMes2}/${TOTAL_MES2} postados</span></button>
   <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">${postDicio}/${TOTAL_DICIO} postados</span></button>
   <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">${postLive}/${TOTAL_LIVE} postados</span></button>
 </div>
@@ -769,13 +809,20 @@ function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
 }
 
 // Injeta os cards em cada série (cada uma com seus mapas do Drive)
-html      = injectCards(html,      postado,  gravado,  headlines);
-dicioHtml = injectCards(dicioHtml, postadoD, gravadoD, headlinesD);
-liveHtml  = injectCards(liveHtml,  postadoL, gravadoL, headlinesL);
+html      = injectCards(html,      postado,     gravado,     headlines);
+mes2Html  = injectCards(mes2Html,  postadoMes2, gravadoMes2, headlinesMes2);
+dicioHtml = injectCards(dicioHtml, postadoD,    gravadoD,    headlinesD);
+liveHtml  = injectCards(liveHtml,  postadoL,    gravadoL,    headlinesL);
 
 // === MONTAGEM DAS ABAS ===
 // Painel 1 (main): envolve o conteúdo existente entre o header e o footer.
 // Painéis 2 e 3: inseridos antes do footer.
+const painelMes2 = `
+<section class="tab-panel" id="tab-mes2" data-series="mes2" data-total="${TOTAL_MES2}" role="tabpanel">
+${dashboardMes2}
+${mes2Html}
+</section>`;
+
 const painelDicio = `
 <section class="tab-panel" id="tab-dicio" data-series="dicio" data-total="${TOTAL_DICIO}" role="tabpanel">
 ${dashboardDicio}
@@ -791,7 +838,7 @@ ${liveHtml}
 html = html.replace(/(<\/header>)/, '$1\n' + tabBar +
   `<section class="tab-panel active" id="tab-main" data-series="main" data-total="${TOTAL_MAIN}" role="tabpanel">` +
   dashboardMain);
-html = html.replace('<footer', '</section>\n' + painelDicio + '\n' + painelLive + '\n<footer');
+html = html.replace('<footer', '</section>\n' + painelMes2 + '\n' + painelDicio + '\n' + painelLive + '\n<footer');
 
 const jsInject = `
 <script>

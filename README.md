@@ -4,7 +4,13 @@ Sistema de Postagens
 
 ## O que é
 
-Um site estático único (`docs/index.html`) que serve como **painel de controle** para o gerenciamento dos 30 Reels (22 Práticos + 8 Motivacionais):
+Um site estático único (`docs/index.html`) que serve como **painel de controle** para o gerenciamento dos Reels, organizado em abas:
+
+- **MÊS 1** — 30 Reels (22 Práticos + 8 Motivacionais)
+- **MÊS 2** — 38 Reels (30 Práticos `23–52` + 8 Motivacionais `9–16`, lote Julho/2026)
+- **Dicionário Contábil** e **Cortes da Live** (séries próprias)
+
+Para cada vídeo o painel oferece:
 
 - **Status automático** de cada vídeo via leitura das pastas do Google Drive (POSTADO / GRAVADO / NÃO GRAVADO)
 - **Botão COPIAR LEGENDA** otimizado para iOS Safari e Android (clipboard API + fallbacks)
@@ -26,12 +32,26 @@ Um site estático único (`docs/index.html`) que serve como **painel de controle
 ```
 .
 ├── .github/workflows/daily-update.yml  ← cron 1x/dia + botão manual
-├── source/headlines.html                ← texto-fonte das 30 legendas
+├── source/headlines.html                ← texto-fonte das 30 legendas (MÊS 1)
+├── source/legendas_mes2_raw.txt         ← texto bruto das 38 legendas do MÊS 2 (fonte da verdade)
+├── source/headlines_mes2.html           ← fragmento gerado do MÊS 2 (NÃO editar à mão)
+├── build_mes2_source.js                 ← gera headlines_mes2.html a partir do .txt
 ├── update.js                            ← gerador
 ├── docs/index.html                      ← saída (servida pelo Pages)
-├── drive_files.json                     ← snapshot da pasta principal do Drive
-├── drive_postados.json                  ← snapshot da subpasta "postados"
+├── drive_files.json                     ← snapshot da pasta principal do Drive (MÊS 1)
+├── drive_postados.json                  ← snapshot da subpasta "postados" (MÊS 1)
+├── drive_mes2.json                      ← snapshot da pasta do MÊS 2 (gerado pelo Action)
 └── diff_check.js                        ← verifica fidelidade textual vs source
+```
+
+### Editar as legendas do MÊS 2
+
+O `source/headlines_mes2.html` é **gerado** — não edite direto. Altere o texto em
+`source/legendas_mes2_raw.txt` e rode:
+
+```bash
+node build_mes2_source.js   # regenera source/headlines_mes2.html
+npm run update:cached       # regenera docs/index.html
 ```
 
 ## Como rodar localmente
