@@ -6,7 +6,12 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 
 // ── Série 1: Práticos + Motivacionais ──
-const FOLDER_TODOS    = '1ZXq4tc08ezjnnC-t8gRbbYslWVIkDhh0';
+// A série é dividida em pastas mensais no Drive (MES 1, MES 2, ...). Toda
+// pasta nova do mês entra nesta lista e os arquivos de todas são somados.
+const FOLDER_TODOS_LIST = [
+  '1ZXq4tc08ezjnnC-t8gRbbYslWVIkDhh0', // MES 1
+  '1wrZXz78E03r1-h59wZRPXWNX18XGNyvn', // MES 2
+];
 const FOLDER_POSTADOS = '1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl';
 // ── Série 2: Práticos do Dicionário ──
 const FOLDER_DICIO          = '1aoKnGLdlQCAXN6TAhCUnASEtMtRC0IfQ';
@@ -73,15 +78,17 @@ if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_post
   livePostFiles = fs.existsSync('drive_live_postados.json')
     ? JSON.parse(fs.readFileSync('drive_live_postados.json', 'utf8')) : [];
 } else {
-  console.log('[1/5] Baixando pasta principal...');
-  const htmlAll  = fetchFolder(FOLDER_TODOS,    'drive_folder.html');
+  console.log('[1/5] Baixando pasta(s) principal(is)...');
+  allFiles = FOLDER_TODOS_LIST.flatMap((id, i) => {
+    const html = fetchFolder(id, i === 0 ? 'drive_folder.html' : `drive_folder_${i + 1}.html`);
+    return parseFiles(html);
+  });
   console.log('[2/5] Baixando subpasta postados...');
   const htmlPost = fetchFolder(FOLDER_POSTADOS, 'drive_postados.html');
   console.log('[3/5] Baixando pasta do dicionário...');
   const htmlDicio = fetchFolder(FOLDER_DICIO,   'drive_dicio.html');
   console.log('[4/5] Baixando pasta dos cortes da live...');
   const htmlLive = fetchFolder(FOLDER_LIVE,     'drive_live.html');
-  allFiles   = parseFiles(htmlAll);
   postFiles  = parseFiles(htmlPost);
   dicioFiles = parseFiles(htmlDicio);
   liveFiles  = parseFiles(htmlLive);
@@ -127,7 +134,7 @@ const gravadoL = {}, postadoL = {};
 for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) gravadoL[k]  = f; }
 for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) postadoL[k] = f; }
 
-const TOTAL_MAIN  = 30;
+const TOTAL_MAIN  = 39;
 const TOTAL_DICIO = 8;
 const TOTAL_LIVE  = plannedLiveKeys.size;
 
