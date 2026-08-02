@@ -218,6 +218,22 @@
   }
   .preview-iframe.open { display: block; }
 
+  /* Capa do corte (série do podcast) */
+  .capa-link {
+    display: inline-block;
+    margin: -6px 0 14px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px dashed #C8A84B;
+    border-radius: 4px;
+    color: #8a6d1f;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .capa-link:hover { background: #FBF6E9; border-style: solid; }
+
   .legenda { position: relative; }
   .copy-btn {
     position: absolute;
@@ -610,12 +626,13 @@
   <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">0/39 postados</span></button>
   <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">0/8 postados</span></button>
   <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">0/4 postados</span></button>
+  <button class="tab-btn" data-tab="podcast" onclick="switchTab('podcast')" type="button">Cortes do Podcast<span class="tab-count">0/3 postados</span></button>
 </div>
 <section class="tab-panel active" id="tab-main" data-series="main" data-total="39" role="tabpanel">
 <div class="dashboard" data-dash="main">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — PRÁTICOS + MOTIVACIONAIS</span>
-    <span class="dash-ts">Atualizado em 02/08/2026, 13:31</span>
+    <span class="dash-ts">Atualizado em 02/08/2026, 14:38</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
@@ -697,6 +714,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P1')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P1" data-src="https://drive.google.com/file/d/1EfPO5CoCnEfQ8jH-jP4SrtmN1iyOpTWR/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P1" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -745,6 +763,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="P2" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -794,6 +813,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P3')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P3" data-src="https://drive.google.com/file/d/17RYbmtTJCwFXlOted5Qr30hHW6WTF0k_/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P3" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -846,6 +866,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="P4" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -894,6 +915,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="P5" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -944,6 +966,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P6')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P6" data-src="https://drive.google.com/file/d/1-sNc-moIqt0wl8M88che1gyvmrOKpiy8/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P6" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -992,6 +1015,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="P7" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1042,6 +1066,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P8')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P8" data-src="https://drive.google.com/file/d/1zPP6fJEjUJ92BDGOP3qaOeti25zRQlea/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P8" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1092,6 +1117,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P9')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P9" data-src="https://drive.google.com/file/d/1M-dPqWzWvKuvD0PTQ0aVUIAkPHLTU6S8/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P9" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1142,6 +1168,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P10')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P10" data-src="https://drive.google.com/file/d/1Tz1ypdDomtRJNzp2ptVpZzlhdPRuu4AI/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P10" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1192,6 +1219,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P11')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P11" data-src="https://drive.google.com/file/d/1aKlgzBgMAXMn6BjfZaGpRoAG2shOLP80/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P11" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1240,6 +1268,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="P12" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1290,6 +1319,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P13')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P13" data-src="https://drive.google.com/file/d/15O0RpzX0e3wiRrD1D8uLlggWCn5RSiAU/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P13" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1340,6 +1370,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P14')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P14" data-src="https://drive.google.com/file/d/1mQ2bhonz9xJg0pwOTB5Do90SnGyQ1Y1C/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P14" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1390,6 +1421,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P15')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P15" data-src="https://drive.google.com/file/d/1qf2WgXVomg7JrUsep18Ysa1EokDjU2jg/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P15" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1440,6 +1472,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P16')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P16" data-src="https://drive.google.com/file/d/1FLAk8k0h9A__cl0itLk7dXK5k7XHiI6H/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P16" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1490,6 +1523,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P17')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P17" data-src="https://drive.google.com/file/d/15UjE2JK_ccUN8rs_HVeXtHh_VyyUjWAg/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P17" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1540,6 +1574,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P18')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P18" data-src="https://drive.google.com/file/d/1yMhIsyjVSQtW-YGrvQVyjEsAQC5hD9ob/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P18" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1590,6 +1625,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P19')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P19" data-src="https://drive.google.com/file/d/1E4B7YZNnti5haKMDHdU6gOvx7u8yOq63/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P19" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1640,6 +1676,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P20')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P20" data-src="https://drive.google.com/file/d/114XBdjOBssySn87mxM5jGfD7zsmhtGWl/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P20" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1690,6 +1727,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P21')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P21" data-src="https://drive.google.com/file/d/1je93g_-qs6eSPjOrwBBHY_WmTu1kAWbC/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P21" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1740,6 +1778,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P22')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P22" data-src="https://drive.google.com/file/d/1AmjMnqqy_rnC1VHbLLnLy2OOZ71wNYNk/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P22" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1790,6 +1829,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P23')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P23" data-src="https://drive.google.com/file/d/1hdK3pUfXE2eLPDWxPdIoCZpgqlDkyUJg/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P23" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1837,6 +1877,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P24')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P24" data-src="https://drive.google.com/file/d/1ZHVCrXCyKxf-N9G900FbKLDRd1PKyV9u/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P24" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1884,6 +1925,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P25')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P25" data-src="https://drive.google.com/file/d/1MI7rxJ1yc4M0tHg_xPEo1HVH_A3EO644/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P25" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1931,6 +1973,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P26')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P26" data-src="https://drive.google.com/file/d/16XKZgDxaT3kC60T1FoVQm-JvWwkypslL/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P26" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -1978,6 +2021,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P27')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P27" data-src="https://drive.google.com/file/d/1Sj-bnC_G0pJCx96sckpXEWj3A9OkgRXf/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P27" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2025,6 +2069,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P28')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P28" data-src="https://drive.google.com/file/d/13Px_YZGtIM75PKJOISNo1tzaeJNvf-gp/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P28" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2072,6 +2117,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_P29')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_P29" data-src="https://drive.google.com/file/d/1ouYOhSLgUYm51_IitbhJKTya4qe1Yxsz/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="P29" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2122,6 +2168,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="M1" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2145,6 +2192,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M2')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M2" data-src="https://drive.google.com/file/d/1gxKpOwNuqbuSgUtf32qXBUUqO3sG7ha9/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M2" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2166,6 +2214,7 @@
         <span class="badge">NÃO GRAVADO</span>
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>
+      
       <button class="manual-status" data-key="M3" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2189,6 +2238,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M4')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M4" data-src="https://drive.google.com/file/d/1n-qTUrBlBchcnxAzY2igJXDM_lG-sTKT/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M4" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2212,6 +2262,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M5')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M5" data-src="https://drive.google.com/file/d/17ZNNl4ndA8Rru_UX3_rT2Ia2wECdj9BW/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M5" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2235,6 +2286,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M6')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M6" data-src="https://drive.google.com/file/d/1uaTvGHCubRNqMoOc8cK6FR7s8X3LOhSp/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M6" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2258,6 +2310,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M7')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M7" data-src="https://drive.google.com/file/d/1O4ddjkIAn4c8qspBtbuiTiG4zo_HyQP3/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M7" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2281,6 +2334,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M8')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M8" data-src="https://drive.google.com/file/d/1oTj3m7EcN2rhCV_epm0lXAxbv69VGVWt/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M8" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2304,6 +2358,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M9')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M9" data-src="https://drive.google.com/file/d/1BLpEDRXx7VFdY8MnvDt1LGNBsBCjommW/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M9" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2351,6 +2406,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_M10')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_M10" data-src="https://drive.google.com/file/d/110AWhvBJPXQPlsnS5TqEP_4pFIcQJmXA/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="M10" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2396,7 +2452,7 @@
 <div class="dashboard" data-dash="dicio">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — DICIONÁRIO CONTÁBIL</span>
-    <span class="dash-ts">Atualizado em 02/08/2026, 13:31</span>
+    <span class="dash-ts">Atualizado em 02/08/2026, 14:38</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
@@ -2452,6 +2508,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D1')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D1" data-src="https://drive.google.com/file/d/108WCryhW_mcf1OaudFyG0n5R5DhkKuJ5/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D1" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2502,6 +2559,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D2')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D2" data-src="https://drive.google.com/file/d/1yDQcFT6j2P5FXZTdmcjVt0hJqjL__jJ9/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D2" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2558,6 +2616,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D3')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D3" data-src="https://drive.google.com/file/d/1DCfATDpQzxBIsj5r8OTXxdfQV71BH6P9/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D3" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2595,6 +2654,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D4')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D4" data-src="https://drive.google.com/file/d/1TKhAHUf15OGnnr_DeLtEMTQKnr4vwsZ5/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D4" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2644,6 +2704,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D5')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D5" data-src="https://drive.google.com/file/d/1R6GIaIUyaqIuXA3n37OiA7g4jK4SCd2J/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D5" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2700,6 +2761,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D6')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D6" data-src="https://drive.google.com/file/d/1QYwZn-yFQKCGtfzeJ1RlKqijya98PpYA/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D6" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2734,6 +2796,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D7')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D7" data-src="https://drive.google.com/file/d/1qmeG3R6ph3BtM53x_Tbg1QLFe7CPAlOO/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D7" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2784,6 +2847,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_D8')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_D8" data-src="https://drive.google.com/file/d/1C7LV0Jq1M1ap6naPJxvQaNobKa2Qw1bD/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="D8" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2816,7 +2880,7 @@
 <div class="dashboard" data-dash="live">
   <div class="dash-head">
     <span class="dash-title">PROGRESSO — CORTES DA LIVE</span>
-    <span class="dash-ts">Atualizado em 02/08/2026, 13:31</span>
+    <span class="dash-ts">Atualizado em 02/08/2026, 14:38</span>
   </div>
   <div class="dash-grid">
     <div class="dash-cell">
@@ -2876,6 +2940,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_L0')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L0" data-src="https://drive.google.com/file/d/1wwWq-2WINo84APDDca40teNgY9E2sS8E/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="L0" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2903,6 +2968,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_L1')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L1" data-src="https://drive.google.com/file/d/1ODW7rIy0moiEczDmxr3PSf28ytkB6BMZ/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="L1" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -2954,6 +3020,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_L2')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L2" data-src="https://drive.google.com/file/d/1_3X0nu-sUC_G_zNu-gdz1eXcJAEuPqNC/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="L2" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -3005,6 +3072,7 @@
         <button class="preview-toggle" onclick="togglePreview('iframe_L3')">PREVIEW</button>
       </div>
       <iframe class="preview-iframe" id="iframe_L3" data-src="https://drive.google.com/file/d/1xxFT5LwlJLHj8lcmLZ1XNqus6hwdneYp/preview" loading="lazy"></iframe>
+      
       <button class="manual-status" data-key="L3" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
@@ -3042,6 +3110,155 @@
       E na prova fiscal, essa diferença vale ponto.
     </div>
     <div class="cta-final">Contabilidade não precisa ser seu ponto fraco. Siga @prof.viniciusferraz e transforme a disciplina que te trava na que te aprova.</div>
+  </div>
+</div>
+
+</section>
+
+<section class="tab-panel" id="tab-podcast" data-series="podcast" data-total="3" role="tabpanel">
+
+<div class="dashboard" data-dash="podcast">
+  <div class="dash-head">
+    <span class="dash-title">PROGRESSO — CORTES DO PODCAST</span>
+    <span class="dash-ts">Atualizado em 02/08/2026, 14:38</span>
+  </div>
+  <div class="dash-grid">
+    <div class="dash-cell">
+      <div class="dash-num">0<span class="dash-of">/3</span></div>
+      <div class="dash-label">POSTADOS</div>
+    </div>
+    <div class="dash-cell">
+      <div class="dash-num">3</div>
+      <div class="dash-label">GRAVADOS<br>aguardando</div>
+    </div>
+    <div class="dash-cell">
+      <div class="dash-num">0</div>
+      <div class="dash-label">NÃO GRAVADOS</div>
+    </div>
+    <div class="dash-cell">
+      <div class="dash-num">0<span class="dash-of">%</span></div>
+      <div class="dash-label">CONCLUÍDO</div>
+    </div>
+  </div>
+  <div class="dash-bar"><div class="dash-bar-fill" style="width:0%"></div></div>
+  
+  <div class="dash-manual">
+    <span>✓ MARCADOS POR VOCÊ NO CELULAR: <span class="dash-manual-count">0</span><span style="opacity:.6;font-weight:600;"> / 3</span></span>
+    <button class="dash-manual-reset" onclick="resetManualStatus('podcast')" type="button">LIMPAR MARCAÇÕES</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     SÉRIE: CORTES DO PODCAST ATIVAMENTE — Pré-lançamento Fluência Contábil
+     Pasta no Drive: 142omJsrsI013DgX03VmE-htjgQrZTl1Y (subpasta de CORTES)
+     Doc oficial de legendas: 1B__208E4NnoP06HC_trycMKTedV0VH5T4Gswvc0D1KI
+     Este arquivo é um FRAGMENTO — o update.js injeta no painel da aba.
+
+     Numeração: o doc chama de "CORTE 1/2/3", mas aqui o rótulo é "PODCAST N"
+     para não colidir com a série Cortes da Live (que também usa "CORTE N").
+     Os arquivos no Drive seguem o padrão "cN-Tema" (com ou sem extensão).
+
+     Cada corte tem uma CAPA (.png) na mesma pasta — o update.js detecta
+     sozinho pelo prefixo cN e linka no card.
+
+     Estado: CORTE 1, 2 e 3 = textos OFICIAIS do doc. CORTE 4 e 5 existem no
+     doc apenas como placeholder ("P", "vV") — sem texto e sem vídeo, por isso
+     ficam de fora até o Vinícius escrever.
+     ============================================================ -->
+
+<div class="section-title">
+  Cortes do Podcast · Ativamente
+  <small>Cortes do podcast Ativamente · pré-lançamento · CTA padrão da série no rodapé de cada legenda</small>
+</div>
+
+<div class="cta-box">
+  <h2>CTA padrão da série</h2>
+  <div class="cta-option">
+    Para mais conteúdos sobre como DOMINAR A CONTABILIDADE e se tornar um CONCURSADO APROVADO, siga @prof.viniciusferraz e aprenda a estudar com quem já passou.
+  </div>
+</div>
+
+<!-- ============ C1 ============ -->
+<div class="legenda">
+  <button class="copy-btn" data-key="C1" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">PODCAST 1</span>
+      <div class="video-card gravado" data-drive-status="gravado">
+        <span class="badge">GRAVADO</span>
+        <a class="drive-link" href="https://drive.google.com/file/d/1oB6gg6_QQ8p2yKao3xv6Kb-ISElg3vqZ/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: c1-O_segredo_para_vencer_na_vida.mp4">PODCAST 1 — O segredo para vencer na vida e nos concursos</a>
+        <button class="preview-toggle" onclick="togglePreview('iframe_C1')">PREVIEW</button>
+      </div>
+      <iframe class="preview-iframe" id="iframe_C1" data-src="https://drive.google.com/file/d/1oB6gg6_QQ8p2yKao3xv6Kb-ISElg3vqZ/preview" loading="lazy"></iframe>
+      <a class="capa-link" href="https://drive.google.com/file/d/1nmySNn93B0LqNgDq1I1XMeWITRl4PX_5/view" target="_blank" rel="noopener" title="Abrir a capa no Google Drive — arquivo: c1- CAPA - O_segredo_para_vencer_na_vida.png">🖼️ VER CAPA DO CORTE</a>
+      <button class="manual-status" data-key="C1" onclick="toggleManualStatus(this)" type="button">
+        <span class="ms-check">⬜</span>
+        <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
+        <span class="ms-date"></span>
+      </button>
+      <span class="tag">[rotina · constância · sem atalho]</span>
+  <div class="headline">O segredo para vencer na vida e nos concursos</div>
+  <div class="body">
+    <div class="opening">
+      Vencer em concurso público não é sorte, é rotina.<br><br>
+      Todo concurseiro já se fez essa pergunta: qual é o atalho? Não existe. O que existe é tempo dedicado, com foco, até virar aprovação — seja pra SEFAZ, TCU, tribunais, Senado ou qualquer cargo que você mirou.<br><br>
+      A maioria não faz o básico: sentar todo dia e evoluir um pouco na disciplina que trava a aprovação — e pra quem presta concurso, quase sempre essa disciplina é contabilidade. Quem faz esse básico, mesmo com dúvida no meio da preparação, sai na frente de quem fica esperando motivação bater primeiro.<br><br>
+      Guarda essa frase pro dia que a dúvida aparecer no meio dos estudos: você já sabe o que fazer, só falta fazer.
+    </div>
+    <div class="cta-final">Para mais conteúdos sobre como DOMINAR A CONTABILIDADE e se tornar um CONCURSADO APROVADO, siga @prof.viniciusferraz e aprenda a estudar com quem já passou.</div>
+  </div>
+</div>
+
+<!-- ============ C2 ============ -->
+<div class="legenda">
+  <button class="copy-btn" data-key="C2" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">PODCAST 2</span>
+      <div class="video-card gravado" data-drive-status="gravado">
+        <span class="badge">GRAVADO</span>
+        <a class="drive-link" href="https://drive.google.com/file/d/19uOWQOyQkVB3WnRQPCOk6W6uoVaUKC9R/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: c2-Celular_o_vilao_da_aprovacao">PODCAST 2 — CELULAR: O maior adversário da sua aprovação em concurso público não pode estar do seu lado</a>
+        <button class="preview-toggle" onclick="togglePreview('iframe_C2')">PREVIEW</button>
+      </div>
+      <iframe class="preview-iframe" id="iframe_C2" data-src="https://drive.google.com/file/d/19uOWQOyQkVB3WnRQPCOk6W6uoVaUKC9R/preview" loading="lazy"></iframe>
+      <a class="capa-link" href="https://drive.google.com/file/d/1l1BGFOswhVEmA1ili8QlD3G2VnX_JuJX/view" target="_blank" rel="noopener" title="Abrir a capa no Google Drive — arquivo: c2-CAPA-Celular_o_vilao_da_aprovacao.png">🖼️ VER CAPA DO CORTE</a>
+      <button class="manual-status" data-key="C2" onclick="toggleManualStatus(this)" type="button">
+        <span class="ms-check">⬜</span>
+        <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
+        <span class="ms-date"></span>
+      </button>
+      <span class="tag">[foco · celular · decisão irrevogável]</span>
+  <div class="headline">CELULAR: O maior adversário da sua aprovação em concurso público não pode estar do seu lado</div>
+  <div class="body">
+    <div class="opening">
+      O maior adversário da sua aprovação em concurso público não pode estar do seu lado...<br><br>
+      Não tem segredo: se o seu celular fica do seu lado enquanto você estuda, ele vence. Chama a atenção, você pega "só um minutinho" e o dia inteiro de preparação foi embora. O mínimo que você precisa fazer é tirar ele do campo de visão — gaveta, outro cômodo, longe.<br><br>
+      Mas isso só funciona depois de uma decisão irrevogável. Não é força de vontade no momento, é ter decidido antes: esse caminho é meu, e nada vai me atrapalhar. Com o objetivo definido, quem manda no negócio é você, não a notificação.<br><br>
+      Quem tem essa maturidade — entender que precisa se preparar pra valer, sem procrastinar — enfrenta os desafios do concurso e chega lá. Quem não tem, vive tropeçando de projeto em projeto e não chega a lugar nenhum.
+    </div>
+    <div class="cta-final">Para mais conteúdos sobre como DOMINAR A CONTABILIDADE e se tornar um CONCURSADO APROVADO, siga @prof.viniciusferraz e aprenda a estudar com quem já passou.</div>
+  </div>
+</div>
+
+<!-- ============ C3 ============ -->
+<div class="legenda">
+  <button class="copy-btn" data-key="C3" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">PODCAST 3</span>
+      <div class="video-card gravado" data-drive-status="gravado">
+        <span class="badge">GRAVADO</span>
+        <a class="drive-link" href="https://drive.google.com/file/d/1u35PhjrMbB9MUCp28XtTojsSnBCX9BNL/view" target="_blank" rel="noopener" title="Abrir no Google Drive — arquivo: c3-Inteligencia_x_disciplina_quem_vence_no_concurso_publico">PODCAST 3 — Inteligência X Disciplina: Quem vence em concurso público?</a>
+        <button class="preview-toggle" onclick="togglePreview('iframe_C3')">PREVIEW</button>
+      </div>
+      <iframe class="preview-iframe" id="iframe_C3" data-src="https://drive.google.com/file/d/1u35PhjrMbB9MUCp28XtTojsSnBCX9BNL/preview" loading="lazy"></iframe>
+      <a class="capa-link" href="https://drive.google.com/file/d/1jbbDF7qjEPr41yl72OlgHP_cUOBks-Z5/view" target="_blank" rel="noopener" title="Abrir a capa no Google Drive — arquivo: c3-CAPA-Inteligencia_x_disciplina_quem_vence_no_concurso_publico.png">🖼️ VER CAPA DO CORTE</a>
+      <button class="manual-status" data-key="C3" onclick="toggleManualStatus(this)" type="button">
+        <span class="ms-check">⬜</span>
+        <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
+        <span class="ms-date"></span>
+      </button>
+      <span class="tag">[disciplina vs QI · persistência]</span>
+  <div class="headline">Inteligência X Disciplina: Quem vence em concurso público?</div>
+  <div class="body">
+    <div class="opening">
+      Quem já deu aula pra milhares de concurseiros pode te afirmar isso: os alunos mais inteligentes, alguns beirando a genialidade, muitas vezes perderam pra quem não tinha o mesmo QI. A vantagem de ser inteligente é velocidade pra absorver o conteúdo — não muda o fato de que você precisa passar por ele inteiro.<br><br>
+      São milhares de páginas. Pra quem é rápido, talvez 8 meses de estudo. Mas esses 8 meses ainda são de três, quatro,cinco horas por dia, todo dia. Não existe pular etapa: prova não pergunta se você é inteligente, pergunta se você sabe o prazo de prescrição, o artigo, o detalhe.<br><br>
+      Talento puro não vence persistência. E no mundo do concurso público, onde boa parte das questões cobra decoreba de prazo e norma, sua inteligência sozinha não vai funcionar.<br><br>
+      SEJA PERSISTENTE E DISCIPLINADO.
+    </div>
+    <div class="cta-final">Para mais conteúdos sobre como DOMINAR A CONTABILIDADE e se tornar um CONCURSADO APROVADO, siga @prof.viniciusferraz e aprenda a estudar com quem já passou.</div>
   </div>
 </div>
 
@@ -3229,7 +3446,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function buildLegendaText(block) {
   // Iterate direct children of .legenda, skipping UI chrome.
   // Uses the already-rendered DOM so innerText is layout-aware.
-  const skipSelector = '.copy-btn, .video-card, .preview-iframe, .num, .tag, .manual-status';
+  const skipSelector = '.copy-btn, .video-card, .preview-iframe, .capa-link, .num, .tag, .manual-status';
   const parts = [];
   for (const child of block.children) {
     if (child.matches(skipSelector)) continue;

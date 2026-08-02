@@ -12,27 +12,65 @@ const FOLDER_TODOS_LIST = [
   '1ZXq4tc08ezjnnC-t8gRbbYslWVIkDhh0', // MES 1
   '1wrZXz78E03r1-h59wZRPXWNX18XGNyvn', // MES 2
 ];
-const FOLDER_POSTADOS = '1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl';
+// A subpasta "postados" foi apagada do Drive (o ID antigo
+// 1jyQlAmuIQnPwu2CE3qP9hyYH-yFl_Uyl responde 404 na API autenticada:
+// "Requested entity was not found"). Enquanto ela não for recriada, o
+// status "postado" vem só da marcação manual que o Vinícius faz no celular.
+const FOLDER_POSTADOS = null;
 // ── Série 2: Práticos do Dicionário ──
 const FOLDER_DICIO          = '1aoKnGLdlQCAXN6TAhCUnASEtMtRC0IfQ';
 const FOLDER_DICIO_POSTADOS = null; // TODO: quando a subpasta "postados" do dicionário existir, colocar o ID aqui
 // ── Série 3: Cortes da Live (Correção SEFAZ-GO 2026 — FCC) ──
 const FOLDER_LIVE          = '1Bpq8zxpBttY3HM1fwEz1nSX70ZiLi5kU';
 const FOLDER_LIVE_POSTADOS = null; // TODO: quando a subpasta "postados" da live existir, colocar o ID aqui
+// ── Série 4: Cortes do Podcast Ativamente (pré-lançamento) ──
+// É uma SUBPASTA de FOLDER_LIVE. O scrape da pasta-mãe não enxerga o conteúdo
+// de subpastas (o Drive só renderiza os filhos diretos), por isso ela precisa
+// ser buscada à parte com o ID próprio.
+const FOLDER_PODCAST          = '142omJsrsI013DgX03VmE-htjgQrZTl1Y';
+const FOLDER_PODCAST_POSTADOS = null; // TODO: quando a subpasta "postados" do podcast existir, colocar o ID aqui
 
-const HTML_IN   = 'source/headlines.html';
-const DICIO_IN  = 'source/dicionario.html';
-const LIVE_IN   = 'source/live.html';
-const HTML_OUT  = 'docs/index.html';
+const HTML_IN     = 'source/headlines.html';
+const DICIO_IN    = 'source/dicionario.html';
+const LIVE_IN     = 'source/live.html';
+const PODCAST_IN  = 'source/podcast.html';
+const HTML_OUT    = 'docs/index.html';
+
+// Erros acumulados durante o fetch. Se uma pasta some do Drive (apagada,
+// movida ou com permissão alterada), o curl devolve uma página de erro que o
+// parser lê como "zero arquivos" — o dashboard então rebaixa vídeos já
+// publicados para "NÃO GRAVADO" sem avisar ninguém. Foi exatamente o que
+// aconteceu com a pasta postados. Agora o status HTTP é conferido e o erro
+// aparece no log em vez de virar um silêncio.
+const fetchErrors = [];
 
 function fetchFolder(id, outFile) {
-  execSync(`curl -sL "https://drive.google.com/drive/folders/${id}" -A "Mozilla/5.0" -o "${outFile}"`, { stdio: 'inherit' });
+  const url = `https://drive.google.com/drive/folders/${id}`;
+  const status = execSync(
+    `curl -sL "${url}" -A "Mozilla/5.0" -o "${outFile}" -w "%{http_code}"`,
+    { encoding: 'utf8' }
+  ).trim();
+  if (status !== '200') {
+    const msg = `Pasta ${id} respondeu HTTP ${status} (esperado 200) — nenhum arquivo será lido dela.`;
+    console.error(`  ⚠️  ${msg}`);
+    fetchErrors.push(msg);
+    return '';
+  }
   return fs.readFileSync(outFile, 'utf8');
 }
 
-function parseFiles(html) {
+// Extrai os arquivos de um dump HTML de pasta do Drive.
+//   kind 'video' → qualquer video/* (mp4, quicktime/.mov, etc.)
+//   kind 'image' → qualquer image/* (usado para as capas dos cortes)
+// O nome vem do marcador `[[16,null,[null,[[["NOME"` , que existe tanto para
+// arquivo com extensão no título ("c1-tema.mp4") quanto sem ("c2-tema").
+function parseFiles(html, kind = 'video') {
+  if (!html) return [];
   const decoded = html.replace(/&quot;/g, '"');
-  const re = /\[null,"([a-zA-Z0-9_-]{25,})"\],null,null,null,"video\/mp4"/g;
+  const re = new RegExp(
+    `\\[null,"([a-zA-Z0-9_-]{25,})"\\],null,null,null,"(${kind}\\/[a-z0-9.+-]+)"`,
+    'g'
+  );
   const hits = [];
   let m;
   while ((m = re.exec(decoded)) !== null) hits.push({ id: m[1], pos: m.index });
@@ -40,7 +78,9 @@ function parseFiles(html) {
   const seen = new Set();
   for (const { id, pos } of hits) {
     if (seen.has(id)) continue;
-    const nameMatch = decoded.slice(pos, pos + 5000).match(/"([^"]+\.mp4)"/);
+    const window = decoded.slice(pos, pos + 5000);
+    const nameMatch = window.match(/\[\[16,null,\[null,\[\[\["([^"]+)"/)
+                   || window.match(/"([^"]+\.(?:mp4|mov|png|jpg|jpeg))"/i);
     if (nameMatch) { out.push({ id, name: nameMatch[1] }); seen.add(id); }
   }
   return out;
@@ -65,10 +105,26 @@ function keyOfLive(name) {
   return m ? 'L' + m[1] : null;
 }
 
+// Arquivos do podcast vêm como "c1-Tema.mp4", "c2-Tema" (sem extensão) ou
+// "c1- CAPA - Tema.png". O espaço depois do hífen aparece em alguns nomes.
+function keyOfPodcast(name) {
+  const m = name.match(/^c\s*(\d+)\s*-/i);
+  return m ? 'C' + m[1] : null;
+}
+
+// Busca uma subpasta "postados" opcional. Quando o ID é null (pasta ainda não
+// criada, ou apagada como a da série 1), devolve lista vazia sem tentar o curl.
+function fetchPostados(id, outFile, label) {
+  if (!id) return [];
+  console.log(`  Baixando subpasta postados (${label})...`);
+  return parseFiles(fetchFolder(id, outFile));
+}
+
 const SKIP_FETCH = process.argv.includes('--cached');
-let allFiles, postFiles, dicioFiles, dicioPostFiles, liveFiles, livePostFiles;
+let allFiles, postFiles, dicioFiles, dicioPostFiles, liveFiles, livePostFiles,
+    podcastFiles, podcastPostFiles, podcastCapas;
 if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_postados.json') && fs.existsSync('drive_dicio.json') && fs.existsSync('drive_live.json')) {
-  console.log('[1-4/5] Usando cache (drive_files / drive_postados / drive_dicio / drive_live .json)');
+  console.log('[1-5/6] Usando cache (drive_*.json)');
   allFiles   = JSON.parse(fs.readFileSync('drive_files.json', 'utf8'));
   postFiles  = JSON.parse(fs.readFileSync('drive_postados.json', 'utf8'));
   dicioFiles = JSON.parse(fs.readFileSync('drive_dicio.json', 'utf8'));
@@ -77,39 +133,47 @@ if (SKIP_FETCH && fs.existsSync('drive_files.json') && fs.existsSync('drive_post
   liveFiles  = JSON.parse(fs.readFileSync('drive_live.json', 'utf8'));
   livePostFiles = fs.existsSync('drive_live_postados.json')
     ? JSON.parse(fs.readFileSync('drive_live_postados.json', 'utf8')) : [];
+  podcastFiles = fs.existsSync('drive_podcast.json')
+    ? JSON.parse(fs.readFileSync('drive_podcast.json', 'utf8')) : [];
+  podcastCapas = fs.existsSync('drive_podcast_capas.json')
+    ? JSON.parse(fs.readFileSync('drive_podcast_capas.json', 'utf8')) : [];
+  podcastPostFiles = fs.existsSync('drive_podcast_postados.json')
+    ? JSON.parse(fs.readFileSync('drive_podcast_postados.json', 'utf8')) : [];
 } else {
-  console.log('[1/5] Baixando pasta(s) principal(is)...');
+  console.log('[1/6] Baixando pasta(s) principal(is)...');
   allFiles = FOLDER_TODOS_LIST.flatMap((id, i) => {
     const html = fetchFolder(id, i === 0 ? 'drive_folder.html' : `drive_folder_${i + 1}.html`);
     return parseFiles(html);
   });
-  console.log('[2/5] Baixando subpasta postados...');
-  const htmlPost = fetchFolder(FOLDER_POSTADOS, 'drive_postados.html');
-  console.log('[3/5] Baixando pasta do dicionário...');
-  const htmlDicio = fetchFolder(FOLDER_DICIO,   'drive_dicio.html');
-  console.log('[4/5] Baixando pasta dos cortes da live...');
-  const htmlLive = fetchFolder(FOLDER_LIVE,     'drive_live.html');
-  postFiles  = parseFiles(htmlPost);
-  dicioFiles = parseFiles(htmlDicio);
-  liveFiles  = parseFiles(htmlLive);
-  dicioPostFiles = [];
-  if (FOLDER_DICIO_POSTADOS) {
-    console.log('[3b/5] Baixando subpasta postados do dicionário...');
-    const htmlDicioPost = fetchFolder(FOLDER_DICIO_POSTADOS, 'drive_dicio_postados.html');
-    dicioPostFiles = parseFiles(htmlDicioPost);
-  }
-  livePostFiles = [];
-  if (FOLDER_LIVE_POSTADOS) {
-    console.log('[4b/5] Baixando subpasta postados da live...');
-    const htmlLivePost = fetchFolder(FOLDER_LIVE_POSTADOS, 'drive_live_postados.html');
-    livePostFiles = parseFiles(htmlLivePost);
-  }
+  console.log('[2/6] Baixando pasta do dicionário...');
+  const htmlDicio = fetchFolder(FOLDER_DICIO, 'drive_dicio.html');
+  console.log('[3/6] Baixando pasta dos cortes da live...');
+  const htmlLive = fetchFolder(FOLDER_LIVE, 'drive_live.html');
+  console.log('[4/6] Baixando pasta dos cortes do podcast...');
+  const htmlPodcast = fetchFolder(FOLDER_PODCAST, 'drive_podcast.html');
+
+  dicioFiles   = parseFiles(htmlDicio);
+  liveFiles    = parseFiles(htmlLive);
+  podcastFiles = parseFiles(htmlPodcast);
+  // As capas ficam na mesma pasta dos vídeos, como imagem, e seguem o mesmo
+  // prefixo cN — dá pra parear com o corte sem cadastrar ID na mão.
+  podcastCapas = parseFiles(htmlPodcast, 'image');
+
+  console.log('[5/6] Baixando subpastas postados...');
+  postFiles        = fetchPostados(FOLDER_POSTADOS,         'drive_postados.html',         'P+M');
+  dicioPostFiles   = fetchPostados(FOLDER_DICIO_POSTADOS,   'drive_dicio_postados.html',   'DICIO');
+  livePostFiles    = fetchPostados(FOLDER_LIVE_POSTADOS,    'drive_live_postados.html',    'LIVE');
+  podcastPostFiles = fetchPostados(FOLDER_PODCAST_POSTADOS, 'drive_podcast_postados.html', 'PODCAST');
+
   fs.writeFileSync('drive_files.json',    JSON.stringify(allFiles,  null, 2));
   fs.writeFileSync('drive_postados.json', JSON.stringify(postFiles, null, 2));
   fs.writeFileSync('drive_dicio.json',    JSON.stringify(dicioFiles, null, 2));
   fs.writeFileSync('drive_dicio_postados.json', JSON.stringify(dicioPostFiles, null, 2));
   fs.writeFileSync('drive_live.json',     JSON.stringify(liveFiles, null, 2));
   fs.writeFileSync('drive_live_postados.json', JSON.stringify(livePostFiles, null, 2));
+  fs.writeFileSync('drive_podcast.json',  JSON.stringify(podcastFiles, null, 2));
+  fs.writeFileSync('drive_podcast_capas.json', JSON.stringify(podcastCapas, null, 2));
+  fs.writeFileSync('drive_podcast_postados.json', JSON.stringify(podcastPostFiles, null, 2));
 }
 
 // ── Série 1 (P/M) ──
@@ -134,9 +198,22 @@ const gravadoL = {}, postadoL = {};
 for (const f of liveFiles)     { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) gravadoL[k]  = f; }
 for (const f of livePostFiles) { const k = keyOfLive(f.name); if (k && plannedLiveKeys.has(k)) postadoL[k] = f; }
 
-const TOTAL_MAIN  = 39;
-const TOTAL_DICIO = 8;
-const TOTAL_LIVE  = plannedLiveKeys.size;
+// ── Série 4 (PODCAST) ──
+// Também é aberta: o total sai das legendas em source/podcast.html. Corte que
+// só existe como placeholder no doc (sem texto) fica fora até ser escrito.
+const plannedPodcastKeys = new Set(
+  (fs.readFileSync(PODCAST_IN, 'utf8').match(/<span class="num">PODCAST\s+(\d+)<\/span>/gi) || [])
+    .map(s => 'C' + s.match(/(\d+)/)[1])
+);
+const gravadoC = {}, postadoC = {}, capaC = {};
+for (const f of podcastFiles)     { const k = keyOfPodcast(f.name); if (k && plannedPodcastKeys.has(k)) gravadoC[k] = f; }
+for (const f of podcastPostFiles) { const k = keyOfPodcast(f.name); if (k && plannedPodcastKeys.has(k)) postadoC[k] = f; }
+for (const f of podcastCapas)     { const k = keyOfPodcast(f.name); if (k && plannedPodcastKeys.has(k)) capaC[k]    = f; }
+
+const TOTAL_MAIN    = 39;
+const TOTAL_DICIO   = 8;
+const TOTAL_LIVE    = plannedLiveKeys.size;
+const TOTAL_PODCAST = plannedPodcastKeys.size;
 
 const allRecorded = new Set([...Object.keys(gravado), ...Object.keys(postado)]);
 const aguardando  = [...Object.keys(gravado)].filter(k => !postado[k]).length;
@@ -150,17 +227,24 @@ const allRecordedL = new Set([...Object.keys(gravadoL), ...Object.keys(postadoL)
 const aguardandoL  = [...Object.keys(gravadoL)].filter(k => !postadoL[k]).length;
 const naoGravadosL = TOTAL_LIVE - allRecordedL.size;
 
-console.log('[5/5] Gerando HTML...');
-console.log(`  [P+M]   POSTADOS: ${Object.keys(postado).length} → ${Object.keys(postado).sort().join(', ')}`);
-console.log(`  [P+M]   AGUARDANDO: ${aguardando} | NÃO GRAVADOS: ${naoGravados}`);
-console.log(`  [DICIO] POSTADOS: ${Object.keys(postadoD).length} → ${Object.keys(postadoD).sort().join(', ')}`);
-console.log(`  [DICIO] AGUARDANDO: ${aguardandoD} | NÃO GRAVADOS: ${naoGravadosD}`);
-console.log(`  [LIVE]  POSTADOS: ${Object.keys(postadoL).length} → ${Object.keys(postadoL).sort().join(', ')}`);
-console.log(`  [LIVE]  AGUARDANDO: ${aguardandoL} | NÃO GRAVADOS: ${naoGravadosL}`);
+const allRecordedC = new Set([...Object.keys(gravadoC), ...Object.keys(postadoC)]);
+const aguardandoC  = [...Object.keys(gravadoC)].filter(k => !postadoC[k]).length;
+const naoGravadosC = TOTAL_PODCAST - allRecordedC.size;
+
+console.log('[6/6] Gerando HTML...');
+console.log(`  [P+M]     POSTADOS: ${Object.keys(postado).length} → ${Object.keys(postado).sort().join(', ')}`);
+console.log(`  [P+M]     AGUARDANDO: ${aguardando} | NÃO GRAVADOS: ${naoGravados}`);
+console.log(`  [DICIO]   POSTADOS: ${Object.keys(postadoD).length} → ${Object.keys(postadoD).sort().join(', ')}`);
+console.log(`  [DICIO]   AGUARDANDO: ${aguardandoD} | NÃO GRAVADOS: ${naoGravadosD}`);
+console.log(`  [LIVE]    POSTADOS: ${Object.keys(postadoL).length} → ${Object.keys(postadoL).sort().join(', ')}`);
+console.log(`  [LIVE]    AGUARDANDO: ${aguardandoL} | NÃO GRAVADOS: ${naoGravadosL}`);
+console.log(`  [PODCAST] POSTADOS: ${Object.keys(postadoC).length} → ${Object.keys(postadoC).sort().join(', ')}`);
+console.log(`  [PODCAST] AGUARDANDO: ${aguardandoC} | NÃO GRAVADOS: ${naoGravadosC} | CAPAS: ${Object.keys(capaC).length}`);
 
 let html = fs.readFileSync(HTML_IN, 'utf8');
-let dicioHtml = fs.readFileSync(DICIO_IN, 'utf8');
-let liveHtml  = fs.readFileSync(LIVE_IN, 'utf8');
+let dicioHtml   = fs.readFileSync(DICIO_IN, 'utf8');
+let liveHtml    = fs.readFileSync(LIVE_IN, 'utf8');
+let podcastHtml = fs.readFileSync(PODCAST_IN, 'utf8');
 
 // Inject viewport meta if missing (essential for mobile rendering)
 if (!/<meta\s+name=["']viewport["']/i.test(html)) {
@@ -175,12 +259,13 @@ function typeToKeyPrefix(type) {
   if (tu.startsWith('PR')) return 'P';
   if (tu.startsWith('DICIO')) return 'D';
   if (tu.startsWith('CORTE')) return 'L';
+  if (tu.startsWith('PODCAST')) return 'C';
   return 'M';
 }
 
 function extractHeadlines(htmlStr) {
   const out = {};
-  const re = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
+  const re = /<div class="legenda(?: motivacional)?">\s*<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE|PODCAST)\s+(\d+)<\/span>[\s\S]*?<div class="headline">([\s\S]*?)<\/div>/g;
   let m;
   while ((m = re.exec(htmlStr)) !== null) {
     out[typeToKeyPrefix(m[1]) + m[2]] = m[3]
@@ -195,7 +280,8 @@ function extractHeadlines(htmlStr) {
 const headlines  = extractHeadlines(html);
 const headlinesD = extractHeadlines(dicioHtml);
 const headlinesL = extractHeadlines(liveHtml);
-console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO) + ${Object.keys(headlinesL).length} (LIVE)`);
+const headlinesC = extractHeadlines(podcastHtml);
+console.log(`  Headlines extraídas: ${Object.keys(headlines).length} (P+M) + ${Object.keys(headlinesD).length} (DICIO) + ${Object.keys(headlinesL).length} (LIVE) + ${Object.keys(headlinesC).length} (PODCAST)`);
 
 const cssInject = `
   /* === SISTEMA DE POSTAGENS === */
@@ -263,6 +349,22 @@ const cssInject = `
     margin: -8px 0 14px;
   }
   .preview-iframe.open { display: block; }
+
+  /* Capa do corte (série do podcast) */
+  .capa-link {
+    display: inline-block;
+    margin: -6px 0 14px;
+    padding: 8px 14px;
+    background: #fff;
+    border: 1px dashed #C8A84B;
+    border-radius: 4px;
+    color: #8a6d1f;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .capa-link:hover { background: #FBF6E9; border-style: solid; }
 
   .legenda { position: relative; }
   .copy-btn {
@@ -652,9 +754,10 @@ function keyLabel(k) {
   if (k[0] === 'P') return 'PRÁTICO ' + k.slice(1);
   if (k[0] === 'M') return 'MOTIVACIONAL ' + k.slice(1);
   if (k[0] === 'L') return 'CORTE ' + k.slice(1);
+  if (k[0] === 'C') return 'PODCAST ' + k.slice(1);
   return 'DICIO ' + k.slice(1);
 }
-const seriesOrder = { P: 0, M: 1, D: 2, L: 3 };
+const seriesOrder = { P: 0, M: 1, D: 2, L: 3, C: 4 };
 function sortKeys(keys) {
   return keys.sort((a, b) => {
     if (a[0] !== b[0]) return seriesOrder[a[0]] - seriesOrder[b[0]];
@@ -662,9 +765,10 @@ function sortKeys(keys) {
   });
 }
 
-const postMain  = Object.keys(postado).length;
-const postDicio = Object.keys(postadoD).length;
-const postLive  = Object.keys(postadoL).length;
+const postMain    = Object.keys(postado).length;
+const postDicio   = Object.keys(postadoD).length;
+const postLive    = Object.keys(postadoL).length;
+const postPodcast = Object.keys(postadoC).length;
 
 // Gera um dashboard individual por série — fica no topo da aba correspondente.
 function buildSeriesDashboard(seriesId, titulo, stats) {
@@ -717,18 +821,23 @@ const dashboardLive = buildSeriesDashboard('live', 'PROGRESSO — CORTES DA LIVE
   postados: postLive, total: TOTAL_LIVE, aguardando: aguardandoL, naoGravados: naoGravadosL,
   postadosKeys: Object.keys(postadoL)
 });
+const dashboardPodcast = buildSeriesDashboard('podcast', 'PROGRESSO — CORTES DO PODCAST', {
+  postados: postPodcast, total: TOTAL_PODCAST, aguardando: aguardandoC, naoGravados: naoGravadosC,
+  postadosKeys: Object.keys(postadoC)
+});
 
 const tabBar = `
 <div class="tab-bar" role="tablist">
   <button class="tab-btn active" data-tab="main" onclick="switchTab('main')" type="button">Práticos + Motiv.<span class="tab-count">${postMain}/${TOTAL_MAIN} postados</span></button>
   <button class="tab-btn" data-tab="dicio" onclick="switchTab('dicio')" type="button">Dicionário<span class="tab-count">${postDicio}/${TOTAL_DICIO} postados</span></button>
   <button class="tab-btn" data-tab="live" onclick="switchTab('live')" type="button">Cortes da Live<span class="tab-count">${postLive}/${TOTAL_LIVE} postados</span></button>
+  <button class="tab-btn" data-tab="podcast" onclick="switchTab('podcast')" type="button">Cortes do Podcast<span class="tab-count">${postPodcast}/${TOTAL_PODCAST} postados</span></button>
 </div>
 `;
 
-function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
+function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap, capaMap = {}) {
   return srcHtml.replace(
-  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE)\s+(\d+)<\/span>/g,
+  /(<div class="legenda(?: motivacional)?">\s*)<span class="num">(PR[ÁA]TICO|MOTIVACIONAL|DICIO|CORTE|PODCAST)\s+(\d+)<\/span>/g,
   (full, prefix, type, num) => {
     const key = typeToKeyPrefix(type) + num;
     const post = postadoMap[key];
@@ -764,25 +873,32 @@ function injectCards(srcHtml, postadoMap, gravadoMap, headlinesMap) {
         <span style="flex:1;color:#888;font-style:italic;">Aguardando aprovação da headline e gravação do vídeo.</span>
       </div>`;
     }
+    // Capa do corte (só a série do podcast tem). O arquivo é detectado
+    // automaticamente na pasta pelo prefixo cN — não precisa cadastrar ID.
+    const capa = capaMap[key];
+    const capaLink = capa
+      ? `<a class="capa-link" href="https://drive.google.com/file/d/${capa.id}/view" target="_blank" rel="noopener" title="Abrir a capa no Google Drive — arquivo: ${capa.name.replace(/"/g, '&quot;')}">🖼️ VER CAPA DO CORTE</a>`
+      : '';
     // Botão de marcação manual (Vinícius marca pelo celular após postar no Instagram)
     const manualBtn = `<button class="manual-status" data-key="${key}" onclick="toggleManualStatus(this)" type="button">
         <span class="ms-check">⬜</span>
         <span class="ms-label">MARCAR COMO POSTADO NO INSTAGRAM</span>
         <span class="ms-date"></span>
       </button>`;
-    return `${prefix}<button class="copy-btn" data-key="${key}" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">${type} ${num}</span>\n      ${card}\n      ${manualBtn}\n      `;
+    return `${prefix}<button class="copy-btn" data-key="${key}" onclick="copyLegenda(this)">COPIAR LEGENDA</button><span class="num">${type} ${num}</span>\n      ${card}\n      ${capaLink}\n      ${manualBtn}\n      `;
   }
   );
 }
 
 // Injeta os cards em cada série (cada uma com seus mapas do Drive)
-html      = injectCards(html,      postado,  gravado,  headlines);
-dicioHtml = injectCards(dicioHtml, postadoD, gravadoD, headlinesD);
-liveHtml  = injectCards(liveHtml,  postadoL, gravadoL, headlinesL);
+html        = injectCards(html,        postado,  gravado,  headlines);
+dicioHtml   = injectCards(dicioHtml,   postadoD, gravadoD, headlinesD);
+liveHtml    = injectCards(liveHtml,    postadoL, gravadoL, headlinesL);
+podcastHtml = injectCards(podcastHtml, postadoC, gravadoC, headlinesC, capaC);
 
 // === MONTAGEM DAS ABAS ===
 // Painel 1 (main): envolve o conteúdo existente entre o header e o footer.
-// Painéis 2 e 3: inseridos antes do footer.
+// Painéis 2 a 4: inseridos antes do footer.
 const painelDicio = `
 <section class="tab-panel" id="tab-dicio" data-series="dicio" data-total="${TOTAL_DICIO}" role="tabpanel">
 ${dashboardDicio}
@@ -795,10 +911,16 @@ ${dashboardLive}
 ${liveHtml}
 </section>`;
 
+const painelPodcast = `
+<section class="tab-panel" id="tab-podcast" data-series="podcast" data-total="${TOTAL_PODCAST}" role="tabpanel">
+${dashboardPodcast}
+${podcastHtml}
+</section>`;
+
 html = html.replace(/(<\/header>)/, '$1\n' + tabBar +
   `<section class="tab-panel active" id="tab-main" data-series="main" data-total="${TOTAL_MAIN}" role="tabpanel">` +
   dashboardMain);
-html = html.replace('<footer', '</section>\n' + painelDicio + '\n' + painelLive + '\n<footer');
+html = html.replace('<footer', '</section>\n' + painelDicio + '\n' + painelLive + '\n' + painelPodcast + '\n<footer');
 
 const jsInject = `
 <script>
@@ -978,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function buildLegendaText(block) {
   // Iterate direct children of .legenda, skipping UI chrome.
   // Uses the already-rendered DOM so innerText is layout-aware.
-  const skipSelector = '.copy-btn, .video-card, .preview-iframe, .num, .tag, .manual-status';
+  const skipSelector = '.copy-btn, .video-card, .preview-iframe, .capa-link, .num, .tag, .manual-status';
   const parts = [];
   for (const child of block.children) {
     if (child.matches(skipSelector)) continue;
@@ -1084,6 +1206,15 @@ if (changed) {
   console.log('● Conteúdo mudou desde a última geração (hash diferente)');
 } else {
   console.log('○ Conteúdo sem mudanças (hash igual)');
+}
+
+// Repete os erros de fetch no fim para não se perderem no meio do log do CI.
+// Sem isso, uma pasta que sumiu do Drive vira só "0 arquivos" e o dashboard
+// rebaixa vídeos já publicados sem que ninguém perceba.
+if (fetchErrors.length) {
+  console.error(`\n⚠️  ${fetchErrors.length} pasta(s) do Drive não puderam ser lidas:`);
+  for (const e of fetchErrors) console.error(`   - ${e}`);
+  console.error('   Os números do dashboard dessas séries estão incompletos.');
 }
 // No CI quem decide se commita é o `git status --porcelain`, não o exit code.
 // Localmente, exit 0 também é mais simples — basta olhar a saída.
